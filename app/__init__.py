@@ -27,8 +27,8 @@ def create_app(config_class=Config):
     login_manager.login_message_category = 'warning'
 
     # Registro de Blueprints (Serão implementados nos próximos passos)
-    # from app.routes.auth import auth_bp
-    # app.register_blueprint(auth_bp)
+    from app.routes.auth import auth_bp
+    app.register_blueprint(auth_bp)
 
 
     # LINHA NOVA: Importa os modelos para que o Flask-Migrate os conheça
