@@ -10,7 +10,7 @@ auth_bp = Blueprint('auth', __name__)
 def login():
     # Se o usuário já estiver logado, redireciona direto para o painel
     if current_user.is_authenticated:
-        return redirect(url_for('auth.dashboard_provisorio'))
+        return redirect(url_for('auth.dashboard'))
         
     form = LoginForm()
     
@@ -27,7 +27,7 @@ def login():
             # Caso o usuário tenha sido interceptado tentando acessar uma rota protegida,
             # o Flask-Login lembra a URL original e a guarda no parâmetro 'next'
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('auth.dashboard_provisorio'))
+            return redirect(next_page) if next_page else redirect(url_for('auth.dashboard'))
             
         # Alerta de erro genérico para dificultar engenharia reversa maliciosa
         flash('Usuário ou senha inválidos, ou conta temporariamente inativa.', 'danger')
@@ -41,12 +41,9 @@ def logout():
     flash('Sessão encerrada com sucesso. Até logo!', 'info')
     return redirect(url_for('auth.login'))
 
-# Rota temporária em texto puro para validarmos que o login funcionou perfeitamente
-@auth_bp.route('/dashboard-provisorio')
+
+# Rota definitiva do Painel Principal (Apontando para a subpasta)
+@auth_bp.route('/dashboard')
 @login_required
-def dashboard_provisorio():
-    return (
-        f"<h1>Painel SGC - Login Efetuado com Sucesso!</h1>"
-        f"<p>Olá, {current_user.nome_completo}. Seu nível de acesso é: <strong>{current_user.role}</strong>.</p>"
-        f"<a href='{url_for('auth.logout')}'>Clique aqui para Sair (Logout)</a>"
-    )
+def dashboard():
+    return render_template('dashboard/dashboard.html')
