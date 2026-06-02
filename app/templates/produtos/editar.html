@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center bg-primary text-white p-3 rounded shadow-sm mb-4">
+        <h4 class="mb-0">SGC - Comercial</h4>
+        <a href="{{ url_for('produto.listar_produtos') }}" class="btn btn-outline-light btn-sm">Cancelar</a>
+    </div>
+
+    <div class="card shadow border-0 max-width-800 mx-auto">
+        <div class="card-header bg-white border-bottom p-3">
+            <h5 class="mb-0 text-secondary fw-bold">Formulário de Edição de Produto</h5>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small text-muted">Código Interno / SKU</label>
+                        <input type="text" class="form-control bg-light text-muted fw-bold" value="{{ produto.codigo_interno }}" readonly>
+                    </div>
+
+                    <div class="col-md-8">
+                        <label for="nome" class="form-label fw-bold small text-muted">Nome do Produto</label>
+                        {{ form.nome(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="descricao" class="form-label fw-bold small text-muted">Descrição</label>
+                    {{ form.descricao(class="form-control", rows="2") }}
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-5">
+                        <label for="categoria" class="form-label fw-bold small text-muted">Categoria</label>
+                        {{ form.categoria(class="form-select") }}
+                    </div>
+
+                    <div class="col-md-7">
+                        <label for="imagem" class="form-label fw-bold small text-muted">Substituir Imagem do Produto</label>
+                        {{ form.imagem(class="form-control") }}
+                        {% if produto.imagem_url %}
+                            <small class="text-success d-block mt-1">✓ Já possui uma imagem salva no catálogo.</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <label for="preco_custo" class="form-label fw-bold small text-muted">Preço de Custo (R$)</label>
+                        {{ form.preco_custo(class="form-control") }}
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <label for="preco_venda" class="form-label fw-bold small text-muted">Preço de Venda (R$)</label>
+                        {{ form.preco_venda(class="form-control") }}
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <label for="quantidade_estoque" class="form-label fw-bold small text-muted">Quantidade em Estoque</label>
+                        {{ form.quantidade_estoque(class="form-control") }}
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <label for="estoque_minimo" class="form-label fw-bold small text-muted">Estoque Mínimo</label>
+                        {{ form.estoque_minimo(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('produto.listar_produtos') }}" class="btn btn-light fw-bold">Voltar para a Lista</a>
+                    <button type="submit" class="btn btn-success fw-bold px-4 shadow-sm">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

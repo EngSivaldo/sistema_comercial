@@ -30,6 +30,13 @@ def create_app(config_class=Config):
     from app.routes.auth import auth_bp
     app.register_blueprint(auth_bp)
 
+    from app.routes.produto import produto_bp  
+    app.register_blueprint(produto_bp)       
+
+    from app.routes.cliente import cliente_bp  
+    # Registre o blueprint junto com os outros existentes
+    app.register_blueprint(cliente_bp)
+
 
     # LINHA NOVA: Importa os modelos para que o Flask-Migrate os conheça
     from app import models

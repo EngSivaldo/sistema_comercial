@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Novo Produto - SGC{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{{ url_for('auth.dashboard') }}">SGC - Comercial</a>
+        <div class="collapse navbar-collapse justify-content-end">
+            <a href="{{ url_for('produto.listar_produtos') }}" class="btn btn-outline-light btn-sm">Cancelar</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container" style="max-width: 800px;">
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-white py-3">
+            <h4 class="fw-bold text-secondary mb-0">Formulário de Cadastro de Produto</h4>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST" action="" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small text-muted">Código Interno / SKU</label>
+                        <input type="text" class="form-control bg-light text-primary fw-bold" value="GERADO AUTOMÁTICO" readonly>
+                    </div>
+                    <div class="col-md-8">
+                        {{ form.nome.label(class="form-label fw-bold small text-muted") }}
+                        {{ form.nome(class="form-control" + (" is-invalid" if form.nome.errors else ""), placeholder="Nome comercial do produto") }}
+                        {% for error in form.nome.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form.descricao.label(class="form-label fw-bold small text-muted") }}
+                    {{ form.descricao(class="form-control", rows="2", placeholder="Detalhes ou especificações técnicas (opcional)") }}
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-5">
+                        {{ form.categoria.label(class="form-label fw-bold small text-muted") }}
+                        {{ form.categoria(class="form-select" + (" is-invalid" if form.categoria.errors else "")) }}
+                        {% for error in form.categoria.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-7">
+                        {{ form.imagem.label(class="form-label fw-bold small text-muted") }}
+                        {{ form.imagem(class="form-control" + (" is-invalid" if form.imagem.errors else "")) }}
+                        {% for error in form.imagem.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        {{ form.preco_custo.label(class="form-label fw-bold small text-muted") }}
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            {{ form.preco_custo(class="form-control" + (" is-invalid" if form.preco_custo.errors else ""), placeholder="0.00") }}
+                        </div>
+                        {% for error in form.preco_custo.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-6 col-md-3">
+                        {{ form.preco_venda.label(class="form-label fw-bold small text-muted") }}
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            {{ form.preco_venda(class="form-control" + (" is-invalid" if form.preco_venda.errors else ""), placeholder="0.00") }}
+                        </div>
+                        {% for error in form.preco_venda.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-6 col-md-3">
+                        {{ form.quantidade_estoque.label(class="form-label fw-bold small text-muted") }}
+                        {{ form.quantidade_estoque(class="form-control" + (" is-invalid" if form.quantidade_estoque.errors else "")) }}
+                    </div>
+                    <div class="col-6 col-md-3">
+                        {{ form.estoque_minimo.label(class="form-label fw-bold small text-muted") }}
+                        {{ form.estoque_minimo(class="form-control" + (" is-invalid" if form.estoque_minimo.errors else "")) }}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('produto.listar_produtos') }}" class="btn btn-light fw-bold">Voltar para a Lista</a>
+                    {{ form.submit(class="btn btn-success fw-bold px-4 shadow-sm") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
