@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Produtos - SGC{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{{ url_for('auth.dashboard') }}">SGC - Comercial</a>
+        <div class="collapse navbar-collapse justify-content-end">
+            <a href="{{ url_for('auth.dashboard') }}" class="btn btn-outline-light btn-sm me-2">Voltar ao Painel</a>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-danger btn-sm fw-bold">Sair</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-secondary">Catálogo de Produtos</h2>
+            <p class="text-muted mb-0">Gerencie o estoque, preços e informações dos itens do sistema.</p>
+        </div>
+        <a href="{{ url_for('produto.cadastrar_produto') }}" class="btn btn-success fw-bold shadow-sm">
+            + Cadastrar Novo Produto
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-uppercase fs-7">
+                        <tr>
+                            <th class="ps-4">Foto</th>
+                            <th>SKU</th>
+                            <th>Nome do Produto</th>
+                            <th>Categoria</th>
+                            <th class="text-end">P. Custo</th>
+                            <th class="text-end">P. Venda</th>
+                            <th class="text-center">Estoque</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if produtos %}
+                            {% for p in produtos %}
+                            <tr class="{{ 'table-warning' if p.estoque_baixo else '' }}">
+                                <td class="ps-4">
+                                    {% if p.imagem_url %}
+                                        <img src="{{ url_for('static', filename=p.imagem_url) }}" alt="Imagem" class="rounded shadow-sm" style="width: 45px; height: 45px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-light text-muted d-flex align-items-center justify-content-center rounded border" style="width: 45px; height: 45px; font-size: 10px;">Sem foto</div>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold text-muted small">{{ p.codigo_interno }}</td>
+                                <td>
+                                    <span class="fw-bold text-dark">{{ p.nome }}</span>
+                                    {% if p.descricao %}
+                                        <small class="d-block text-muted text-truncate" style="max-width: 250px;">{{ p.descricao }}</small>
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge bg-secondary">{{ p.categoria }}</span></td>
+                                <td class="text-end">R$ {{ "%.2f"|format(p.preco_custo) }}</td>
+                                <td class="text-end fw-bold text-primary">R$ {{ "%.2f"|format(p.preco_venda) }}</td>
+                                <td class="text-center fw-bold">{{ p.quantidade_estoque }}</td>
+                                <td class="text-center">
+                                    {% if p.estoque_baixo %}
+                                        <span class="badge bg-danger">Repor Stock</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Estável</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="{{ url_for('produto.editar_produto', id=p.id) }}" class="btn btn-sm btn-warning fw-bold py-1 px-2 shadow-sm text-dark">
+                                            Editar
+                                        </a>
+                                        
+                                        <button type="button" 
+                                                class="btn btn-sm btn-danger fw-bold py-1 px-2 shadow-sm" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#confirmDeleteModal" 
+                                                data-nome="{{ p.nome }}"
+                                                data-url="{{ url_for('produto.deletar_produto', id=p.id) }}">
+                                            Deletar
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="9" class="text-center py-5 text-muted">
+                                    Nenhum produto cadastrado no catálogo até o momento.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="confirmDeleteModalLabel">
+                    ⚠️ Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <p class="fs-5 mb-2 text-secondary">Tem certeza que deseja remover este produto?</p>
+                <h4 class="fw-bold text-danger mb-3" id="modalProductName">Nome do Produto</h4>
+                <p class="text-muted small mb-0">Esta ação é permanente e não poderá ser desfeita no sistema.</p>
+            </div>
+            <div class="modal-footer bg-light border-0 justify-content-center gap-2 py-3">
+                <button type="button" class="btn btn-secondary fw-bold px-3 shadow-sm" data-bs-dismiss="modal">Cancelar</button>
+                <form id="deleteForm" action="" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-danger fw-bold px-3 shadow-sm">Sim, Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+        if (confirmDeleteModal) {
+            confirmDeleteModal.addEventListener('show.bs.modal', function(event) {
+                // Botão que disparou o modal
+                const button = event.relatedTarget;
+                
+                // Extrai as informações dos atributos data-*
+                const nomeProduto = button.getAttribute('data-nome');
+                const urlDeletar = button.getAttribute('data-url');
+                
+                // Atualiza o texto com o nome do produto interno do modal
+                const modalProductName = confirmDeleteModal.querySelector('#modalProductName');
+                modalProductName.textContent = nomeProduto;
+                
+                // Altera o 'action' do formulário para a rota correta de exclusão
+                const deleteForm = confirmDeleteModal.querySelector('#deleteForm');
+                deleteForm.setAttribute('action', urlDeletar);
+            });
+        }
+    });
+</script>
+{% endblock %}
