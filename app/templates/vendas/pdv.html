@@ -6,7 +6,11 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
     <div class="container-fluid px-4">
         <a class="navbar-brand fw-bold" href="{{ url_for('auth.dashboard') }}">SGC - Frente de Caixa (PDV)</a>
+
         <div class="d-flex align-items-center">
+            <span class="text-white me-4 fs-6">
+                👤 <strong>Operador:</strong> {{ current_user.nome if current_user.nome else current_user.username }}
+            </span>
             <span class="badge bg-success me-3 p-2 fs-6">🟢 Caixa Operacional Aberto</span>
             <a href="{{ url_for('auth.dashboard') }}" class="btn btn-outline-light btn-sm me-2">Painel Inicial</a>
         </div>
