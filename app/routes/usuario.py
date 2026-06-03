@@ -12,8 +12,12 @@ def listar_usuarios():
         flash("Acesso negado! Esta área é exclusiva para administradores.", "danger")
         return redirect(url_for('auth.dashboard'))
         
-    usuarios = Usuario.query.order_by(Usuario.nome_completo).all()
-    return render_template('usuarios/listar.html', usuarios=usuarios)
+    # Implementação de Paginação Profissional (10 usuários por página)
+    page = request.args.get('page', 1, type=int)
+    pagination = Usuario.query.order_by(Usuario.nome_completo).paginate(page=page, per_page=10, error_out=False)
+    usuarios = pagination.items
+    
+    return render_template('usuarios/listar.html', usuarios=usuarios, pagination=pagination)
 
 @usuario_bp.route('/cadastrar', methods=['GET', 'POST'])
 @login_required
@@ -32,6 +36,11 @@ def cadastrar_usuario():
             flash("Todos os campos obrigatórios devem ser preenchidos.", "warning")
             return render_template('usuarios/cadastrar.html')
 
+        # Regra de Produção: Validação de força de senha no Backend
+        if len(senha) < 6:
+            flash("Segurança enfraquecida: A senha deve conter no mínimo 6 caracteres.", "warning")
+            return render_template('usuarios/cadastrar.html')
+
         usuario_existente = Usuario.query.filter_by(username=username).first()
         if usuario_existente:
             flash("Este nome de usuário já está cadastrado no sistema.", "danger")
@@ -46,7 +55,7 @@ def cadastrar_usuario():
             return redirect(url_for('usuario.listar_usuarios'))
         except Exception as e:
             db.session.rollback()
-            flash("Erro ao salvar o usuário.", "danger")
+            flash("Erro interno ao salvar o usuário.", "danger")
 
     return render_template('usuarios/cadastrar.html')
 
@@ -70,12 +79,16 @@ def editar_usuario(id):
             flash("Nome de usuário e Nome completo são obrigatórios.", "warning")
             return render_template('usuarios/editar.html', usuario=usuario)
 
-        # Se o username mudou, checa se o novo já não pertence a outro usuário
         if username != usuario.username:
             existente = Usuario.query.filter_by(username=username).first()
             if existente:
                 flash("Este nome de usuário já está em uso.", "danger")
                 return render_template('usuarios/editar.html', usuario=usuario)
+
+        # Regra de Produção: Validação de senha na alteração opcional
+        if senha and len(senha) < 6:
+            flash("A nova senha informada deve conter no mínimo 6 caracteres.", "warning")
+            return render_template('usuarios/editar.html', usuario=usuario)
 
         try:
             usuario.username = username
@@ -83,7 +96,6 @@ def editar_usuario(id):
             usuario.role = role
             usuario.ativo = ativo
 
-            # Altera a senha somente se o admin digitou algo no campo
             if senha:
                 usuario.set_senha(senha)
 
@@ -103,18 +115,18 @@ def deletar_usuario(id):
         flash("Acesso negado!", "danger")
         return redirect(url_for('auth.dashboard'))
 
-    # Trava de segurança: impede o admin de se auto-excluir
     if id == current_user.id:
-        flash("Segurança: Você não pode excluir o seu próprio usuário administrador logado!", "danger")
+        flash("Segurança: Operação abortada! Você não pode desativar a si próprio.", "danger")
         return redirect(url_for('usuario.listar_usuarios'))
 
     usuario = Usuario.query.get_or_404(id)
     try:
-        db.session.delete(usuario)
+        # ARQUITETURA SÊNIOR: Substituição de exclusão física por Soft Delete (Desativação Lógica)
+        usuario.ativo = False
         db.session.commit()
-        flash(f"Usuário '{usuario.nome_completo}' removido do sistema.", "success")
+        flash(f"O usuário '{usuario.nome_completo}' foi desativado com sucesso. O histórico de movimentações e caixas foi preservado para auditoria.", "success")
     except Exception as e:
         db.session.rollback()
-        flash("Erro ao remover o usuário. Certifique-se de que ele não possui caixas vinculados.", "danger")
+        flash("Erro interno ao tentar alterar o status do usuário.", "danger")
 
     return redirect(url_for('usuario.listar_usuarios'))
