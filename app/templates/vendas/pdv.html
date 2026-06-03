@@ -93,6 +93,7 @@
                     <button type="button" class="btn btn-success btn-lg w-100 fw-bold py-3 shadow-sm fs-5 mt-3" id="btn_finalizar">
                         🚀 Emitir e Finalizar Venda
                     </button>
+                    <button type="button" onclick="limparCarrinhoAntesDeEnviar()" class="btn btn-outline-danger w-100 btn-sm fw-bold">🗑️ Limpar / Cancelar Carrinho</button>
                 </div>
             </div>
         </div>
@@ -141,6 +142,7 @@
             </div>
             <div class="modal-footer d-flex flex-column gap-1 p-2 border-0">
                 <button class="btn btn-primary w-100 fw-bold" onclick="imprimirCupom()">🖨️ Imprimir Comprovante</button>
+                <button class="btn btn-danger w-100 fw-bold" onclick="cancelarVendaAtual()">❌ Cancelar Esta Venda (Estorno)</button>
                 <button class="btn btn-secondary w-100 fw-bold" data-bs-dismiss="modal">🛒 Próxima Venda (Fechar)</button>
             </div>
         </div>
@@ -270,8 +272,34 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     window.removerDoCarrinho = function(id) {
-        carrinho = carrinho.filter(item => item.id !== id);
-        atualizarInterfaceCarrinho();
+        // Localiza o produto no carrinho para exibir o nome no alerta
+        const produto = carrinho.find(item => item.id === id);
+        const nomeProduto = produto ? produto.nome : "este produto";
+
+        Swal.fire({
+            title: 'Remover item?',
+            text: `Deseja realmente retirar "${nomeProduto}" do carrinho?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545', // Vermelho padrão de exclusão
+            cancelButtonColor: '#6c757d',  // Cinza discreto para voltar
+            confirmButtonText: 'Sim, remover',
+            cancelButtonText: 'Não, manter',
+            returnFocus: false             // Impede o SweetAlert de travar o foco ao fechar
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Se confirmado, remove o item do carrinho e atualiza a tela
+                carrinho = carrinho.filter(item => item.id !== id);
+                atualizarInterfaceCarrinho();
+            }
+
+            // Garante que o cursor volte a piscar no campo de bipe/busca imediatamente
+            setTimeout(() => {
+                if (typeof buscarInput !== 'undefined') {
+                    buscarInput.focus();
+                }
+            }, 200);
+        });
     };
 
     function atualizarInterfaceCarrinho() {
@@ -317,7 +345,16 @@ document.addEventListener('DOMContentLoaded', function() {
     btnFinalizar.addEventListener('click', function(e) {
         e.preventDefault();
         if (carrinho.length === 0) {
-            alert('Adicione pelo menos um produto ao carrinho antes de finalizar a venda.');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Carrinho Vazio',
+                text: 'Adicione pelo menos um produto ao carrinho antes de finalizar a venda.',
+                confirmButtonColor: '#198754', // Cor verde correspondente ao seu botão de sucesso
+                confirmButtonText: 'Entendido',
+                customClass: {
+                    popup: 'rounded-4 shadow' // Mantém o padrão arredondado do Bootstrap 5
+                }
+            });
             return;
         }
 
@@ -346,6 +383,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(res => res.json())
         .then(resposta => {
+            window.vendaIdAtual = resposta.venda_id;
             if (resposta.sucesso) {
                 try {
                     const agora = new Date();
@@ -402,10 +440,127 @@ document.addEventListener('DOMContentLoaded', function() {
             btnFinalizar.innerText = '🚀 Emitir e Finalizar Venda';
         });
     });
+
+    window.limparCarrinhoAntesDeEnviar = function() {
+        if (carrinho.length === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Carrinho já está vazio',
+                confirmButtonColor: '#6c757d'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Esvaziar carrinho?',
+            text: "Todos os itens inseridos serão removidos da tela atual.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sim, limpar tudo!',
+            cancelButtonText: 'Voltar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                carrinho.length = 0; // Altera o tamanho do array original para zero com segurança
+                atualizarInterfaceCarrinho(); // Redesenha a tabela limpando a tela do operador
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Carrinho limpo!',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        });
+    };
+
+    // Detecta automaticamente quando o modal do cupom for fechado (por qualquer motivo)
+    const modalCupomElement = document.getElementById('modalCupom');
+    if (modalCupomElement) {
+        modalCupomElement.addEventListener('hidden.bs.modal', function () {
+            // 1. Limpa o ID da venda antiga para segurança do sistema
+            window.vendaIdAtual = null;
+            
+            // 2. Devolve o foco com um pequeno atraso para vencer as animações do SweetAlert2
+            if (typeof buscarInput !== 'undefined') {
+                buscarInput.value = '';
+                
+                setTimeout(() => {
+                    buscarInput.focus();
+                }, 150); // 150ms é o tempo perfeito para o navegador encerrar os modais
+            }
+        });
+    }
+
+    // Foco automático assim que o PDV abre pela primeira vez
+    if (typeof buscarInput !== 'undefined') {
+        setTimeout(() => {
+            buscarInput.focus();
+        }, 300); // 300ms garante que o navegador renderizou o layout antes de puxar o teclado
+    }
+
 });
 
 function imprimirCupom() {
     window.print();
 }
+
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // Esta função fica isolada, sem nenhuma outra função em volta dela
+    function cancelarVendaAtual() {
+        if (!window.vendaIdAtual) {
+            Swal.fire('Erro', 'ID da venda não foi localizado.', 'error');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Tem certeza?',
+            text: "Esta ação vai estornar o caixa do operador e devolver os produtos ao estoque físico!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sim, estornar venda!',
+            cancelButtonText: 'Voltar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/vendas/api/cancelar/${window.vendaIdAtual}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    }
+                })
+                .then(res => res.json())
+                .then(dados => {
+                    if (dados.sucesso) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Venda Cancelada!',
+                            text: dados.mensagem,
+                            confirmButtonColor: '#198754'
+                        }).then(() => {
+                            const modalCupomElement = document.getElementById('modalCupom');
+                            const modalInstance = bootstrap.Modal.getInstance(modalCupomElement);
+                            if (modalInstance) {
+                                modalInstance.hide();
+                            }
+                        });
+                    } else {
+                        Swal.fire('Erro ao Cancelar', dados.mensagem, 'error');
+                    }
+                })
+                .catch(erro => {
+                    Swal.fire('Erro', 'Não foi possível contatar o servidor para o estorno.', 'error');
+                });
+            }
+        });
+    }
+</script>
+
 {% endblock %}

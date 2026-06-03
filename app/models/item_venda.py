@@ -1,6 +1,7 @@
 from app import db
 
 class ItemVenda(db.Model):
+    # Use UNDERLINE (_), nunca hífen (-)
     __tablename__ = 'itens_venda'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -8,6 +9,6 @@ class ItemVenda(db.Model):
     preco_unitario = db.Column(db.Numeric(10, 2), nullable=False)
     subtotal = db.Column(db.Numeric(10, 2), nullable=False)
 
-    # Chaves Estrangeiras
+    # Chaves Estrangeiras (Também com underline)
     venda_id = db.Column(db.Integer, db.ForeignKey('vendas.id'), nullable=False)
     produto_id = db.Column(db.Integer, db.ForeignKey('produtos.id'), nullable=False)
