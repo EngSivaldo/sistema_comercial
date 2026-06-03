@@ -43,7 +43,11 @@ def create_app(config_class=Config):
     # Adicione estas duas linhas logo abaixo:
     from app.routes.caixa import caixa_bp
     app.register_blueprint(caixa_bp)
+     # No topo, junto com as outras importações de rotas:
+    from app.routes.usuario import usuario_bp
 
+    # Abaixo, onde os outros blueprints são registrados (geralmente dentro de create_app):
+    app.register_blueprint(usuario_bp)	
 
     # LINHA NOVA: Importa os modelos para que o Flask-Migrate os conheça
     from app import models
