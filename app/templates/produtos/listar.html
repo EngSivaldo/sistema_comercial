@@ -2,98 +2,194 @@
 
 {% block title %}Produtos - SGC{% endblock %}
 
+{% block styles %}
+<style>
+    /* Estilização Premium para Tabelas Corporativas */
+    .table-container {
+        border-radius: 12px !important;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+    .table thead {
+        background-color: #f8fafc !important;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .table th {
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.05em !important;
+        color: #64748b !important;
+        padding: 1rem 0.75rem !important;
+    }
+
+    .table td {
+        padding: 1rem 0.75rem !important;
+        color: #334155;
+    }
+
+    /* Linha com estoque baixo ganha um tom suave em vez do amarelo bruto do Bootstrap */
+    .row-stock-warning {
+        background-color: #fffbeb !important;
+    }
+    .row-stock-warning:hover {
+        background-color: #fef3c7 !important;
+    }
+
+    /* Badges de Categorias e Status Minimalistas */
+    .badge-category {
+        background-color: #f1f5f9;
+        color: #475569;
+        font-weight: 500;
+        font-size: 0.8rem;
+        padding: 0.35rem 0.6rem;
+        border-radius: 6px;
+    }
+
+    .badge-status-stable {
+        background-color: rgba(22, 163, 74, 0.1);
+        color: #15803d;
+        font-weight: 600;
+        font-size: 0.75rem;
+        padding: 0.35rem 0.6rem;
+        border-radius: 50px;
+    }
+
+    .badge-status-low {
+        background-color: rgba(220, 38, 38, 0.1);
+        color: #b91c1c;
+        font-weight: 600;
+        font-size: 0.75rem;
+        padding: 0.35rem 0.6rem;
+        border-radius: 50px;
+    }
+
+    /* Botões de Ações Discretos (Padrão SaaS) */
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        border: 1px solid #e2e8f0;
+        background-color: #ffffff;
+    }
+
+    .btn-action-edit {
+        color: #d97706;
+    }
+    .btn-action-edit:hover {
+        background-color: #fef3c7;
+        border-color: #fde68a;
+        color: #b45309;
+    }
+
+    .btn-action-delete {
+        color: #dc2626;
+    }
+    .btn-action-delete:hover {
+        background-color: #fee2e2;
+        border-color: #fecaca;
+        color: #991b1b;
+    }
+
+    .product-img-placeholder {
+        width: 44px;
+        height: 44px;
+        font-size: 0.65rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: -0.2px;
+        background-color: #f1f5f9;
+        color: #94a3b8;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="{{ url_for('auth.dashboard') }}">SGC - Comercial</a>
-        <div class="collapse navbar-collapse justify-content-end">
-            <a href="{{ url_for('auth.dashboard') }}" class="btn btn-outline-light btn-sm me-2">Voltar ao Painel</a>
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-danger btn-sm fw-bold">Sair</a>
-        </div>
-    </div>
-</nav>
-
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container py-2">
+    
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom border-light">
         <div>
-            <h2 class="fw-bold text-secondary">Catálogo de Produtos</h2>
-            <p class="text-muted mb-0">Gerencie o estoque, preços e informações dos itens do sistema.</p>
+            <h2 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">Catálogo de Produtos</h2>
+            <p class="text-secondary mb-0">Gerencie o estoque de mercadorias, precificação de custos, margens de venda e informações gerais.</p>
         </div>
-        <a href="{{ url_for('produto.cadastrar_produto') }}" class="btn btn-success fw-bold shadow-sm">
-            + Cadastrar Novo Produto
-        </a>
+        <div>
+            <a href="{{ url_for('produto.cadastrar_produto') }}" class="btn btn-primary fw-semibold px-4 py-2 shadow-sm d-inline-flex align-items-center" style="background-color: #1e3a8a; border-color: #1e3a8a; border-radius: 8px;">
+                <i class="fa-solid fa-plus me-2 fs-6"></i> Cadastrar Novo Produto
+            </a>
+        </div>
     </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <div class="card shadow-sm">
+    <div class="card shadow-sm border-0">
         <div class="card-body p-0">
-            <div class="table-responsive">
+            <div class="table-responsive table-container">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-uppercase fs-7">
-                        <tr>
-                            <th class="ps-4">Foto</th>
-                            <th>SKU</th>
-                            <th>Nome do Produto</th>
+                    <thead>
+                        <tr class="text-uppercase">
+                            <th class="ps-4" style="width: 70px;">Item</th>
+                            <th style="width: 120px;">SKU / Código</th>
+                            <th>Nome / Descrição</th>
                             <th>Categoria</th>
-                            <th class="text-end">P. Custo</th>
-                            <th class="text-end">P. Venda</th>
-                            <th class="text-center">Estoque</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-center">Ações</th>
+                            <th class="text-end" style="width: 110px;">P. Custo</th>
+                            <th class="text-end" style="width: 110px;">P. Venda</th>
+                            <th class="text-center" style="width: 100px;">Estoque</th>
+                            <th class="text-center" style="width: 130px;">Status</th>
+                            <th class="text-center" style="width: 110px;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% if produtos %}
                             {% for p in produtos %}
-                            <tr class="{{ 'table-warning' if p.estoque_baixo else '' }}">
+                            <tr class="{{ 'row-stock-warning' if p.estoque_baixo else '' }}">
                                 <td class="ps-4">
                                     {% if p.imagem_url %}
-                                        <img src="{{ url_for('static', filename=p.imagem_url) }}" alt="Imagem" class="rounded shadow-sm" style="width: 45px; height: 45px; object-fit: cover;">
+                                        <img src="{{ url_for('static', filename=p.imagem_url) }}" alt="Imagem de {{ p.nome }}" class="rounded shadow-sm border" style="width: 44px; height: 44px; object-fit: cover;">
                                     {% else %}
-                                        <div class="bg-light text-muted d-flex align-items-center justify-content-center rounded border" style="width: 45px; height: 45px; font-size: 10px;">Sem foto</div>
+                                        <div class="product-img-placeholder d-flex align-items-center justify-content-center rounded border text-center p-1">
+                                            <span>S/ Foto</span>
+                                        </div>
                                     {% endif %}
                                 </td>
-                                <td class="fw-bold text-muted small">{{ p.codigo_interno }}</td>
                                 <td>
-                                    <span class="fw-bold text-dark">{{ p.nome }}</span>
+                                    <span class="font-monospace fw-semibold text-secondary small">{{ p.codigo_interno }}</span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark">{{ p.nome }}</div>
                                     {% if p.descricao %}
-                                        <small class="d-block text-muted text-truncate" style="max-width: 250px;">{{ p.descricao }}</small>
+                                        <small class="text-secondary d-inline-block text-truncate mb-0" style="max-width: 280px; font-size: 0.825rem;">{{ p.descricao }}</small>
                                     {% endif %}
                                 </td>
-                                <td><span class="badge bg-secondary">{{ p.categoria }}</span></td>
-                                <td class="text-end">R$ {{ "%.2f"|format(p.preco_custo) }}</td>
-                                <td class="text-end fw-bold text-primary">R$ {{ "%.2f"|format(p.preco_venda) }}</td>
-                                <td class="text-center fw-bold">{{ p.quantidade_estoque }}</td>
+                                <td>
+                                    <span class="badge-category">{{ p.categoria }}</span>
+                                </td>
+                                <td class="text-end font-monospace text-secondary fs-7">R$ {{ "%.2f"|format(p.preco_custo) }}</td>
+                                <td class="text-end font-monospace fw-semibold" style="color: #1e3a8a;">R$ {{ "%.2f"|format(p.preco_venda) }}</td>
+                                <td class="text-center font-monospace fw-semibold">{{ p.quantidade_estoque }}</td>
                                 <td class="text-center">
                                     {% if p.estoque_baixo %}
-                                        <span class="badge bg-danger">Repor Stock</span>
+                                        <span class="badge-status-low"><i class="fa-solid fa-triangle-exclamation me-1"></i> Repor Stock</span>
                                     {% else %}
-                                        <span class="badge bg-success">Estável</span>
+                                        <span class="badge-status-stable"><i class="fa-solid fa-circle-check me-1"></i> Estável</span>
                                     {% endif %}
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-2">
-                                        <a href="{{ url_for('produto.editar_produto', id=p.id) }}" class="btn btn-sm btn-warning fw-bold py-1 px-2 shadow-sm text-dark">
-                                            Editar
+                                        <a href="{{ url_for('produto.editar_produto', id=p.id) }}" class="btn-action btn-action-edit" title="Editar Produto">
+                                            <i class="fa-solid fa-pen-to-square fs-7"></i>
                                         </a>
                                         
                                         <button type="button" 
-                                                class="btn btn-sm btn-danger fw-bold py-1 px-2 shadow-sm" 
+                                                class="btn-action btn-action-delete" 
                                                 data-bs-toggle="modal" 
                                                 data-bs-target="#confirmDeleteModal" 
                                                 data-nome="{{ p.nome }}"
-                                                data-url="{{ url_for('produto.deletar_produto', id=p.id) }}">
-                                            Deletar
+                                                data-url="{{ url_for('produto.deletar_produto', id=p.id) }}"
+                                                title="Excluir Produto">
+                                            <i class="fa-solid fa-trash-can fs-7"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -101,7 +197,8 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="9" class="text-center py-5 text-muted">
+                                <td colspan="9" class="text-center py-5 text-secondary opacity-75">
+                                    <i class="fa-solid fa-box-open fs-2 mb-3 d-block text-muted"></i>
                                     Nenhum produto cadastrado no catálogo até o momento.
                                 </td>
                             </tr>
@@ -114,25 +211,26 @@
 </div>
 
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title fw-bold" id="confirmDeleteModalLabel">
-                    ⚠️ Confirmar Exclusão
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center py-4">
-                <p class="fs-5 mb-2 text-secondary">Tem certeza que deseja remover este produto?</p>
-                <h4 class="fw-bold text-danger mb-3" id="modalProductName">Nome do Produto</h4>
-                <p class="text-muted small mb-0">Esta ação é permanente e não poderá ser desfeita no sistema.</p>
-            </div>
-            <div class="modal-footer bg-light border-0 justify-content-center gap-2 py-3">
-                <button type="button" class="btn btn-secondary fw-bold px-3 shadow-sm" data-bs-dismiss="modal">Cancelar</button>
-                <form id="deleteForm" action="" method="POST" class="d-inline">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="btn btn-danger fw-bold px-3 shadow-sm">Sim, Excluir</button>
-                </form>
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-body text-center p-4">
+                <div class="text-danger mb-3">
+                    <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem;"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-2" style="letter-spacing: -0.5px;">Confirmar Exclusão</h4>
+                <p class="text-secondary small mb-3">Você tem certeza de que deseja remover o produto listado abaixo? Esta operação não poderá ser revertida.</p>
+                
+                <div class="p-3 bg-light rounded-3 mb-4 border border-light">
+                    <h5 class="fw-bold text-danger mb-0 text-truncate" id="modalProductName">Nome do Produto</h5>
+                </div>
+
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-light fw-semibold px-4" data-bs-dismiss="modal" style="border-radius: 8px; border: 1px solid #cbd5e1; color: #475569;">Cancelar</button>
+                    <form id="deleteForm" action="" method="POST" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger fw-semibold px-4" style="border-radius: 8px;">Sim, Excluir</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

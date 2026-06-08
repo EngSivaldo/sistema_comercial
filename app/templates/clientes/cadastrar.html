@@ -1,139 +1,202 @@
 {% extends 'base.html' %}
 
-{% block title %}Cadastrar Cliente - SGC{% endblock %}
+{% block title %}Novo Cliente - SGC{% endblock %}
+
+{% block styles %}
+<style>
+    /* Estilização dos Cards e Inputs no padrão SaaS */
+    .client-card {
+        border-radius: 12px !important;
+        border: 1px solid #e2e8f0 !important;
+        background-color: #ffffff;
+    }
+
+    .form-section-title {
+        font-size: 1rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* Input focus customizado idêntico ao padrão do sistema */
+    .form-control:focus, .form-select:focus {
+        border-color: #1e3a8a !important;
+        box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.15) !important;
+        background-color: #ffffff !important;
+    }
+
+    /* Ajuste para inputs com ícones (input-groups) */
+    .input-group-text {
+        border-radius: 8px 0 0 8px !important;
+        border: 1px solid #cbd5e1 !important;
+    }
+    
+    .input-group .form-control {
+        border-radius: 0 8px 8px 0 !important;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 0.6rem 0.75rem;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="{{ url_for('auth.dashboard') }}">SGC - Comercial</a>
-        <div class="collapse navbar-collapse justify-content-end">
-            <a href="{{ url_for('cliente.listar_clientes') }}" class="btn btn-outline-light btn-sm me-2">Voltar à Lista</a>
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-danger btn-sm fw-bold">Sair</a>
+<div class="container-fluid px-4 py-2">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom border-light">
+        <div>
+            <h2 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">Novo Cadastro de Cliente</h2>
+            <div class="d-flex flex-wrap align-items-center gap-2 text-secondary small">
+                <span><i class="fa-solid fa-users me-1"></i> Clientes</span>
+                <span class="text-muted">/</span>
+                <span class="text-dark fw-medium">Adicionar Novo</span>
+            </div>
+        </div>
+        <div>
+            <a href="{{ url_for('cliente.listar_clientes') }}" class="btn btn-sm btn-light border fw-semibold px-3 py-2" style="border-radius: 8px;">
+                <i class="fa-solid fa-arrow-left me-1 small"></i> Voltar à Lista
+            </a>
         </div>
     </div>
-</nav>
 
-<div class="container pb-5">
     <div class="row justify-content-center">
-        <div class="col-lg-10">
-            
-            <div class="mb-4">
-                <h2 class="fw-bold text-secondary">Novo Cadastro de Cliente</h2>
-                <p class="text-muted mb-0">O sistema agora valida e formata automaticamente os documentos e contatos.</p>
-            </div>
+        <div class="col-xxl-9 col-lg-11">
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
-                            {{ message }}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm border-0 mb-4" role="alert" style="border-radius: 8px;">
+                            <div class="d-flex align-items-center gap-2">
+                                {% if category == 'success' %}
+                                    <i class="fa-solid fa-circle-check text-success"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-circle-exclamation text-danger"></i>
+                                {% endif %}
+                                <span>{{ message }}</span>
+                            </div>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     {% endfor %}
                 {% endif %}
             {% endwith %}
 
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
+            <div class="card client-card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    
                     <form action="{{ url_for('cliente.cadastrar_cliente') }}" method="POST" id="formCliente">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                        <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">Identificação e Registro</h5>
+                        <div class="d-flex align-items-center gap-2 text-primary text-uppercase fw-bold form-section-title mb-3 pb-2 border-bottom">
+                            <i class="fa-solid fa-address-card small"></i> Identificação e Registro
+                        </div>
+                        
                         <div class="row g-3 mb-4">
                             <div class="col-md-8">
-                                <label for="nome" class="form-label fw-bold text-secondary">Nome Completo ou Razão Social <span class="text-danger">*</span></label>
+                                <label for="nome" class="form-label fw-semibold text-dark">Nome Completo ou Razão Social <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="nome" name="nome" placeholder="Ex: João Silva ou Empresa ACME" required autocomplete="off">
                             </div>
                             <div class="col-md-4">
-                                <label for="cpf_cnpj" class="form-label fw-bold text-secondary">CPF ou CNPJ</label>
-                                <input type="text" class="form-control font-monospace" id="cpf_cnpj" name="cpf_cnpj" placeholder="000.000.000-00 ou 00.000.000/0001-00" maxlength="18" autocomplete="off">
-                                <div class="invalid-feedback" id="doc-error">Documento inválido.</div>
+                                <label for="cpf_cnpj" class="form-label fw-semibold text-dark">CPF ou CNPJ</label>
+                                <input type="text" class="form-control font-monospace" id="cpf_cnpj" name="cpf_cnpj" placeholder="000.000.000-00 ou 00.000.000/0001-00" autocomplete="off">
                             </div>
                         </div>
 
-                        <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">Contatos</h5>
+                        <div class="d-flex align-items-center gap-2 text-primary text-uppercase fw-bold form-section-title mb-3 pb-2 border-bottom">
+                            <i class="fa-solid fa-phone small"></i> Canais de Contato
+                        </div>
+                        
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
-                                <label for="telefone" class="form-label fw-bold text-secondary">Telefone Fixo</label>
-                                <input type="tel" class="form-control" id="telefone" name="telefone" placeholder="(00) 0000-0000" maxlength="14" autocomplete="off">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="whatsapp" class="form-label fw-bold text-secondary">WhatsApp</label>
+                                <label for="telefone" class="form-label fw-semibold text-dark">Telefone Fixo</label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-success-subtle text-success">🟢</span>
-                                    <input type="tel" class="form-control" id="whatsapp" name="whatsapp" placeholder="(00) 90000-0000" maxlength="15" autocomplete="off">
+                                    <span class="input-group-text bg-light text-secondary"><i class="fa-solid fa-phone-flip fs-7"></i></span>
+                                    <input type="tel" class="form-control" id="telefone" name="telefone" placeholder="(00) 0000-0000" autocomplete="off">
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label for="email" class="form-label fw-bold text-secondary">E-mail</label>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="nome@provedor.com" autocomplete="off">
+                                <label for="whatsapp" class="form-label fw-semibold text-dark">WhatsApp</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-success-subtle text-success"><i class="fa-brands fa-whatsapp fs-5"></i></span>
+                                    <input type="tel" class="form-control" id="whatsapp" name="whatsapp" placeholder="(00) 90000-0000" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="email" class="form-label fw-semibold text-dark">E-mail Corporativo</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-secondary"><i class="fa-solid fa-envelope fs-7"></i></span>
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="nome@provedor.com" autocomplete="off">
+                                </div>
                             </div>
                         </div>
 
-                        <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">Endereço Residencial ou Comercial</h5>
+                        <div class="d-flex align-items-center gap-2 text-primary text-uppercase fw-bold form-section-title mb-3 pb-2 border-bottom">
+                            <i class="fa-solid fa-location-dot small"></i> Localização e Endereço
+                        </div>
+                        
                         <div class="row g-3 mb-4">
                             <div class="col-12">
-                                <label for="endereco" class="form-label fw-bold text-secondary">Endereço Completo</label>
-                                <input type="text" class="form-control" id="endereco" name="endereco" placeholder="Rua, Número, Bairro, Cidade - UF" autocomplete="off">
+                                <label for="endereco" class="form-label fw-semibold text-dark">Endereço Completo</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-secondary"><i class="fa-solid fa-map-location-dot fs-7"></i></span>
+                                    <input type="text" class="form-control" id="endereco" name="endereco" placeholder="Rua, Número, Bairro, Cidade - UF" autocomplete="off">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end gap-2 border-top pt-3 mt-4">
-                            <a href="{{ url_for('cliente.listar_clientes') }}" class="btn btn-secondary fw-bold px-4 shadow-sm">
+                        <div class="d-flex justify-content-end gap-2 border-top pt-4 mt-4">
+                            <a href="{{ url_for('cliente.listar_clientes') }}" class="btn btn-light border fw-semibold px-4 py-2" style="border-radius: 8px;">
                                 Cancelar
                             </a>
-                            <button type="submit" class="btn btn-success fw-bold px-4 shadow-sm">
-                                Salvar Cliente
+                            <button type="submit" class="btn btn-success fw-semibold px-4 py-2 d-inline-flex align-items-center gap-2" style="border-radius: 8px; background-color: #10b981; border-color: #10b981;">
+                                <i class="fa-solid fa-floppy-disk small"></i> Salvar Registro
                             </button>
                         </div>
                     </form>
+
                 </div>
             </div>
 
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
+<script src="https://unpkg.com/imask"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const cpfCnpjInput = document.getElementById('cpf_cnpj');
-    const telefoneInput = document.getElementById('telefone');
-    const whatsappInput = document.getElementById('whatsapp');
-
-    // Máscara Dinâmica para CPF/CNPJ (Detecta o tamanho automaticamente)
-    cpfCnpjInput.addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, ''); // Remove tudo que não for número
-        if (value.length <= 11) {
-            // Aplica máscara de CPF: 000.000.000-00
-            value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-        } else {
-            // Aplica máscara de CNPJ: 00.000.000/0001-00
-            value = value.slice(0, 14); // Limita ao máximo de dígitos de CNPJ
-            value = value.replace(/^(\d{2})(\d)/, '$1.$2');
-            value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
-            value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
-            value = value.replace(/(\d{4})(\d)/, '$1-$2');
+    document.addEventListener('DOMContentLoaded', function () {
+        // Máscara dinâmica inteligente para CPF/CNPJ
+        const documentField = document.getElementById('cpf_cnpj');
+        if (documentField) {
+            IMask(documentField, {
+                mask: [
+                    { mask: '000.000.000-00' },
+                    { mask: '00.000.000/0000-00' }
+                ]
+            });
         }
-        e.target.value = value;
-    });
 
-    // Máscara para Telefone Fixo: (00) 0000-0000
-    telefoneInput.addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, '');
-        value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
-        value = value.replace(/(\d{4})(\d)/, '$1-$2');
-        e.target.value = value;
-    });
+        // Máscara flexível para Telefones Fixos (8 dígitos) e Celulares/WhatsApp (9 dígitos)
+        const telefoneField = document.getElementById('telefone');
+        if (telefoneField) {
+            IMask(telefoneField, {
+                mask: [
+                    { mask: '(00) 0000-0000' },
+                    { mask: '(00) 00000-0000' }
+                ]
+            });
+        }
 
-    // Máscara para Celular/WhatsApp: (00) 00000-0000
-    whatsappInput.addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, '');
-        value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
-        value = value.replace(/(\d{5})(\d)/, '$1-$2');
-        e.target.value = value;
+        const whatsappField = document.getElementById('whatsapp');
+        if (whatsappField) {
+            IMask(whatsappField, {
+                mask: [
+                    { mask: '(00) 0000-0000' },
+                    { mask: '(00) 00000-0000' }
+                ]
+            });
+        }
     });
-});
 </script>
 {% endblock %}

@@ -2,48 +2,102 @@
 
 {% block title %}Login - SGC{% endblock %}
 
+{% block styles %}
+<style>
+    /* Estilização Premium para os Campos de Input do Flask-WTF */
+    .form-control-custom {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        padding: 0.65rem 0.75rem !important;
+        font-size: 0.95rem !important;
+        color: #334155 !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+    
+    .form-control-custom:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+        background-color: #ffffff !important;
+    }
+
+    /* Feedback de Validação Refinado */
+    .form-control-custom.is-invalid {
+        border-color: #ef4444 !important;
+    }
+    .form-control-custom.is-invalid:focus {
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+    }
+
+    /* Botão de Login Estilizado */
+    .btn-login-custom {
+        background-color: #1e3a8a !important;
+        border: 1px solid #1e3a8a !important;
+        color: #ffffff !important;
+        border-radius: 8px !important;
+        padding: 0.75rem !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+
+    .btn-login-custom:hover {
+        background-color: #2563eb !important;
+        border-color: #2563eb !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+        transform: translateY(-1px);
+    }
+
+    .btn-login-custom:active {
+        transform: translateY(0);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 85vh;">
-    <div class="card shadow-lg border-0" style="width: 100%; max-width: 420px; border-radius: 12px;">
-        <div class="card-body p-5">
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 75vh;">
+    <div class="card shadow-lg border-0" style="width: 100%; max-width: 400px; border-radius: 12px;">
+        <div class="card-body p-4 p-md-5">
             <div class="text-center mb-4">
-                <h3 class="fw-bold text-primary">SGC</h3>
-                <p class="text-muted">Gestão Comercial Integrada</p>
+                <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 56px; height: 56px; background-color: rgba(30, 58, 138, 0.08) !important; color: #1e3a8a !important;">
+                    <i class="fa-solid fa-shop fs-4"></i>
+                </div>
+                <h3 class="fw-bold tracking-tight mb-1" style="color: #1e3a8a; letter-spacing: -0.5px;">Acessar o SGC</h3>
+                <p class="text-secondary small mb-0">Insira suas credenciais para entrar no sistema</p>
             </div>
 
             <form method="POST" action="{{ url_for('auth.login') }}" novalidate>
                 {{ form.hidden_tag() }}
 
                 <div class="mb-3">
-                    {{ form.username.label(class="form-label fw-semibold") }}
+                    {{ form.username.label(class="form-label text-secondary small fw-medium mb-1") }}
                     {% if form.username.errors %}
-                        {{ form.username(class="form-control is-invalid", placeholder="Digite seu usuário") }}
-                        <div class="invalid-feedback">
+                        {{ form.username(class="form-control form-control-custom is-invalid", placeholder="Nome de usuário") }}
+                        <div class="invalid-feedback small fw-medium">
                             {% for error in form.username.errors %}
                                 {{ error }}
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.username(class="form-control", placeholder="Digite seu usuário") }}
+                        {{ form.username(class="form-control form-control-custom", placeholder="Nome de usuário") }}
                     {% endif %}
                 </div>
 
                 <div class="mb-4">
-                    {{ form.password.label(class="form-label fw-semibold") }}
+                    {{ form.password.label(class="form-label text-secondary small fw-medium mb-1") }}
                     {% if form.password.errors %}
-                        {{ form.password(class="form-control is-invalid", placeholder="Digite sua senha") }}
-                        <div class="invalid-feedback">
+                        {{ form.password(class="form-control form-control-custom is-invalid", placeholder="Sua senha") }}
+                        <div class="invalid-feedback small fw-medium">
                             {% for error in form.password.errors %}
                                 {{ error }}
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.password(class="form-control", placeholder="Digite sua senha") }}
+                        {{ form.password(class="form-control form-control-custom", placeholder="Sua senha") }}
                     {% endif %}
                 </div>
 
                 <div class="d-grid gap-2">
-                    {{ form.submit(class="btn btn-primary btn-lg fw-bold", style="border-radius: 8px;") }}
+                    {{ form.submit(class="btn btn-login-custom d-flex align-items-center justify-content-center") }}
                 </div>
             </form>
         </div>

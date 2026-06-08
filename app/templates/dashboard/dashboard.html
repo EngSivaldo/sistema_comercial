@@ -2,134 +2,228 @@
 
 {% block title %}Painel de Controle - SGC{% endblock %}
 
+{% block styles %}
+<style>
+    /* Estilização Premium para o Grid de Módulos */
+    .module-card {
+        border: 1px solid #e2e8f0 !important;
+        background-color: #ffffff;
+        border-radius: 12px !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Efeito sutil de hover sem mover bruscamente a tela */
+    .module-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 20px -4px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.03) !important;
+        border-color: #cbd5e1 !important;
+    }
+
+    /* Customização dos ícones superiores */
+    .icon-wrapper {
+        width: 44px;
+        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-size: 1.15rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Cores sofisticadas para os badges de status */
+    .status-badge {
+        font-size: 0.725rem;
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+    }
+
+    /* Botões personalizados do Dashboard */
+    .btn-module {
+        font-size: 0.875rem;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    /* Estilo elegante para módulos desativados/bloqueados */
+    .module-disabled {
+        background-color: #f8fafc !important;
+        border-color: #f1f5f9 !important;
+        opacity: 0.7;
+    }
+    .module-disabled:hover {
+        transform: none !important;
+        box-shadow: var(--sgc-card-shadow) !important;
+        border-color: #f1f5f9 !important;
+    }
+
+    /* Ajuste fino na espaçabilidade de textos */
+    .tracking-wide {
+        letter-spacing: 0.05em !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="#">SGC - Gestão Comercial Integrada</a>
-        <div class="collapse navbar-collapse justify-content-end">
-            <span class="navbar-text text-white me-3">
-                Olá, <span class="fw-bold text-warning">{{ current_user.username if current_user.is_authenticated else 'Sivaldo' }}</span> (Administrador)
-            </span>
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-danger btn-sm fw-bold shadow-sm">Sair do Sistema</a>
-        </div>
-    </div>
-</nav>
-
-<div class="container">
-    <div class="mb-5">
-        <h2 class="fw-bold text-secondary">Painel de Controle Operacional</h2>
-        <p class="text-muted">Bem-vindo ao centro operacional do seu sistema comercial. Gerencie todas as extensões abaixo.</p>
+<div class="container py-2">
+    <!-- Cabeçalho Principal limpo e sem poluição -->
+    <div class="mb-4 pb-3 border-bottom border-light">
+        <h2 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">Painel de Controle Operacional</h2>
+        <p class="text-secondary mb-0">Bem-vindo ao centro administrativo do SGC. Monitore e gerencie as extensões do seu sistema.</p>
     </div>
 
-    <h5 class="fw-bold text-muted mb-3 text-uppercase fs-7 tracking-wider">Módulos Disponíveis</h5>
-    <div class="row g-4 mb-5">
+    <!-- Seção de Título de Módulos -->
+    <div class="d-flex align-items-center mb-3">
+        <h6 class="text-secondary fw-bold text-uppercase tracking-wide mb-0 style" style="font-size: 0.75rem;">Módulos do Sistema</h6>
+    </div>
+    
+    <div class="row g-4">
         
-        <div class="col-md-4">
-            <div class="card h-100 border-start border-primary border-4 shadow-sm hover-card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title fw-bold text-primary mb-0">Produtos & Estoque</h5>
-                        <span class="badge bg-primary-subtle text-primary border border-primary px-2">Ativo</span>
+        <!-- MÓDULO: PRODUTOS & ESTOQUE -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 module-card p-2">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="icon-wrapper bg-primary bg-opacity-10 text-primary" style="background-color: rgba(37, 99, 235, 0.08) !important; color: #2563eb !important;">
+                                <i class="fa-solid fa-box-open"></i>
+                            </div>
+                            <span class="status-badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Ativo</span>
+                        </div>
+                        <h5 class="card-title fw-semibold text-dark mb-2">Produtos & Estoque</h5>
+                        <p class="card-text text-secondary small lh-base">Acesse o catálogo completo, cadastre novos itens, gerencie preços de custo/venda e monitore alertas de reposição mínima.</p>
                     </div>
-                    <p class="card-text text-muted small">Acesse o catálogo completo, cadastre novos itens, gerencie preços de custo/venda e monitore alertas de reposição mínima.</p>
-                    <a href="{{ url_for('produto.listar_produtos') }}" class="btn btn-primary btn-sm fw-bold w-100 mt-2 shadow-sm">
-                        Abrir Catálogo →
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100 border-start border-success border-4 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title fw-bold text-success mb-0">Frente de Caixa (PDV)</h5>
-                        <span class="badge bg-success-subtle text-success border border-success px-2">Pronto</span>
-                    </div>
-                    <p class="card-text text-muted small">Abertura, fechamento e sangria de caixa em tempo real. Interface otimizada para lançamentos e recebimentos diários.</p>
-                    <a href="{{ url_for('venda.pdv') }}" class="btn btn-success btn-sm fw-bold w-100 mt-2 shadow-sm">
-                        Acessar Caixa →
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100 border-start border-warning border-4 shadow-sm opacity-85">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title fw-bold text-warning mb-0">Cadastro de Clientes</h5>
-                        <span class="badge bg-warning-subtle text-warning border border-warning px-2">Pronto</span>
-                    </div>
-                    <p class="card-text text-muted small">Gerenciamento de registros de clientes, histórico de compras individuais e relatórios de inadimplência ou crédito corporativo.</p>
-                    <a href="{{ url_for('cliente.listar_clientes') }}" class="btn btn-primary btn-sm fw-bold w-100">
-                Gerenciar Clientes
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100 border-start border-info border-4 shadow-sm opacity-75">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title fw-bold text-info mb-0">Histórico de Vendas</h5>
-                        <span class="badge bg-light text-muted border px-2">Expansão</span>
-                    </div>
-                    <p class="card-text text-muted small">Mapeamento e busca detalhada de todas as ordens de vendas emitidas, cancelamentos e devoluções fiscais processadas.</p>
-                    <a href="#" class="btn btn-outline-secondary btn-sm fw-bold w-100 mt-2 disabled">Módulo Bloqueado</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100 border-start border-danger border-4 shadow-sm opacity-75">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title fw-bold text-danger mb-0">Relatórios & DRE</h5>
-                        <span class="badge bg-light text-muted border px-2">Expansão</span>
-                    </div>
-                    <p class="card-text text-muted small">Análise de faturamento líquido, margens de lucro por categoria de produto e demonstrativos financeiros para tomada de decisão.</p>
-                    <a href="#" class="btn btn-outline-secondary btn-sm fw-bold w-100 mt-2 disabled">Módulo Bloqueado</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100 border-start border-dark border-4 shadow-sm {% if not current_user.is_admin %}opacity-75{% endif %}">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title fw-bold text-dark mb-0">Configurações</h5>
-                        <span class="badge bg-light text-muted border px-2">Sistema</span>
-                    </div>
-                    <p class="card-text text-muted small">Customização de dados da empresa, gerenciamento de permissões de operadores e chaves de segurança do banco PostgreSQL.</p>
-                    
-                    {% if current_user.is_admin %}
-                        <a href="{{ url_for('usuario.listar_usuarios') }}" class="btn btn-dark btn-sm fw-bold w-100 mt-2 shadow-sm">
-                            Gerenciar Equipe →
+                    <div class="mt-3">
+                        <a href="{{ url_for('produto.listar_produtos') }}" class="btn btn-primary btn-module w-100 d-flex align-items-center justify-content-center" style="background-color: #1e3a8a; border-color: #1e3a8a;">
+                            Abrir Catálogo <i class="fa-solid fa-arrow-right ms-2 fs-7 opacity-75"></i>
                         </a>
-                    {% else %}
-                        <a href="#" class="btn btn-outline-secondary btn-sm fw-bold w-100 mt-2 disabled">
-                            Acesso Restrito
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÓDULO: FRENTE DE CAIXA (PDV) -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 module-card p-2">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="icon-wrapper bg-success bg-opacity-10 text-success" style="background-color: rgba(22, 163, 74, 0.08) !important; color: #16a34a !important;">
+                                <i class="fa-solid fa-cash-register"></i>
+                            </div>
+                            <span class="status-badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Pronto</span>
+                        </div>
+                        <h5 class="card-title fw-semibold text-dark mb-2">Frente de Caixa (PDV)</h5>
+                        <p class="card-text text-secondary small lh-base">Abertura, fechamento e sangria de caixa em tempo real. Interface otimizada para lançamentos rápidos e recebimentos diários.</p>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ url_for('venda.pdv') }}" class="btn btn-success btn-module w-100 d-flex align-items-center justify-content-center" style="background-color: #16a34a; border-color: #16a34a;">
+                            Acessar Caixa <i class="fa-solid fa-arrow-right ms-2 fs-7 opacity-75"></i>
                         </a>
-                    {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÓDULO: CADASTRO DE CLIENTES -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 module-card p-2">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="icon-wrapper bg-info bg-opacity-10 text-info" style="background-color: rgba(14, 165, 233, 0.08) !important; color: #0ea5e9 !important;">
+                                <i class="fa-solid fa-user-tag"></i>
+                            </div>
+                            <span class="status-badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Pronto</span>
+                        </div>
+                        <h5 class="card-title fw-semibold text-dark mb-2">Cadastro de Clientes</h5>
+                        <p class="card-text text-secondary small lh-base">Gerenciamento de registros de clientes, histórico de compras individuais e relatórios de inadimplência ou crédito corporativo.</p>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ url_for('cliente.listar_clientes') }}" class="btn btn-outline-primary btn-module w-100 d-flex align-items-center justify-content-center" style="color: #1e3a8a; border-color: #1e3a8a;">
+                            Gerenciar Clientes <i class="fa-solid fa-arrow-right ms-2 fs-7 opacity-75"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÓDULO: HISTÓRICO DE VENDAS -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 module-card module-disabled p-2">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="icon-wrapper bg-secondary bg-opacity-10 text-secondary" style="background-color: rgba(100, 116, 139, 0.08) !important; color: #64748b !important;">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </div>
+                            <span class="status-badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">Breve</span>
+                        </div>
+                        <h5 class="card-title fw-semibold text-muted mb-2">Histórico de Vendas</h5>
+                        <p class="card-text text-secondary opacity-75 small lh-base">Mapeamento e busca detalhada de todas as ordens de vendas emitidas, cancelamentos e devoluções fiscais processadas.</p>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-light btn-module text-muted w-100 disabled" style="background-color: #e2e8f0; border-color: #e2e8f0;">Módulo Bloqueado</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÓDULO: RELATÓRIOS & DRE -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 module-card module-disabled p-2">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="icon-wrapper bg-secondary bg-opacity-10 text-secondary" style="background-color: rgba(100, 116, 139, 0.08) !important; color: #64748b !important;">
+                                <i class="fa-solid fa-chart-pie"></i>
+                            </div>
+                            <span class="status-badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">Breve</span>
+                        </div>
+                        <h5 class="card-title fw-semibold text-muted mb-2">Relatórios & DRE</h5>
+                        <p class="card-text text-secondary opacity-75 small lh-base">Análise de faturamento líquido, margens de lucro por categoria de produto e demonstrativos financeiros para tomada de decisão.</p>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-light btn-module text-muted w-100 disabled" style="background-color: #e2e8f0; border-color: #e2e8f0;">Módulo Bloqueado</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÓDULO: CONFIGURAÇÕES -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 module-card p-2 {% if not current_user.is_admin %}module-disabled{% endif %}">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="icon-wrapper bg-dark bg-opacity-10 text-dark" style="background-color: rgba(15, 23, 42, 0.06) !important; color: #0f172a !important;">
+                                <i class="fa-solid fa-sliders"></i>
+                            </div>
+                            <span class="status-badge bg-dark bg-opacity-10 text-dark border border-dark border-opacity-10">Restrito</span>
+                        </div>
+                        <h5 class="card-title fw-semibold {% if current_user.is_admin %}text-dark{% else %}text-muted{% endif %} mb-2">Configurações</h5>
+                        <p class="card-text text-secondary small lh-base">Customização de dados da empresa, gerenciamento de permissões de operadores e chaves de segurança do banco de dados.</p>
+                    </div>
+                    <div class="mt-3">
+                        {% if current_user.is_admin or current_user.role in ['admin', 'Administrador'] %}
+                            <a href="{{ url_for('usuario.listar_usuarios') }}" class="btn btn-dark btn-module w-100 d-flex align-items-center justify-content-center" style="background-color: #0f172a; border-color: #0f172a;">
+                                Gerenciar Equipe <i class="fa-solid fa-arrow-right ms-2 fs-7 opacity-75"></i>
+                            </a>
+                        {% else %}
+                            <button class="btn btn-light btn-module text-muted w-100 disabled" style="background-color: #e2e8f0; border-color: #e2e8f0;">Acesso Admin Restrito</button>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
 
     </div>
 </div>
-
-<style>
-    /* Estilização suave para efeito visual moderno nos cartões do SGC */
-    .hover-card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .hover-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-    }
-    .opacity-85 { opacity: 0.90; }
-    .opacity-75 { opacity: 0.75; }
-</style>
 {% endblock %}

@@ -2,175 +2,170 @@
 
 {% block title %}Clientes - SGC{% endblock %}
 
-{% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="{{ url_for('auth.dashboard') }}">SGC - Comercial</a>
-        <div class="collapse navbar-collapse justify-content-end">
-            <a href="{{ url_for('auth.dashboard') }}" class="btn btn-outline-light btn-sm me-2">Voltar ao Painel</a>
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-danger btn-sm fw-bold">Sair</a>
-        </div>
-    </div>
-</nav>
+{% block styles %}
+<style>
+    /* Customização fina para tabelas padrão SaaS */
+    .table-responsive {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        background-color: #ffffff;
+    }
+    
+    .table th {
+        background-color: #f8fafc !important;
+        color: #475569 !important;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        font-size: 0.75rem !important;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.5rem !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+    }
 
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    .table td {
+        padding: 1rem 1.5rem !important;
+        vertical-align: middle;
+        color: #334155;
+        font-size: 0.875rem;
+        border-bottom: 1px solid #f1f5f9 !important;
+    }
+
+    .table tr:last-child td {
+        border-bottom: none !important;
+    }
+
+    /* Badge para o ID do cliente */
+    .id-badge {
+        background-color: #f1f5f9;
+        color: #64748b;
+        font-family: monospace;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+
+    /* Botões de ação flutuantes em tabelas */
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-2">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom border-light">
         <div>
-            <h2 class="fw-bold text-secondary">Gerenciamento de Clientes</h2>
-            <p class="text-muted mb-0">Cadastre e consulte as informações dos clientes do sistema.</p>
+            <h2 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">Gerenciamento de Clientes</h2>
+            <div class="d-flex flex-wrap align-items-center gap-2 text-secondary small">
+                <span><i class="fa-solid fa-users me-1"></i> Clientes</span>
+                <span class="text-muted">/</span>
+                <span class="text-dark fw-medium">Listagem Geral</span>
+            </div>
         </div>
-        <a href="{{ url_for('cliente.cadastrar_cliente') }}" class="btn btn-success fw-bold shadow-sm">
-            + Cadastrar Novo Cliente
-        </a>
+        <div>
+            <a href="{{ url_for('cliente.cadastrar_cliente') }}" class="btn btn-primary fw-semibold px-4 py-2 d-inline-flex align-items-center gap-2" style="border-radius: 8px; background-color: #1e3a8a; border-color: #1e3a8a;">
+                <i class="fa-solid fa-user-plus small"></i> Novo Cliente
+            </a>
+        </div>
     </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
-                    {{ message }}
+                <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm border-0 mb-4" role="alert" style="border-radius: 8px;">
+                    <div class="d-flex align-items-center gap-2">
+                        {% if category == 'success' %}
+                            <i class="fa-solid fa-circle-check text-success"></i>
+                        {% else %}
+                            <i class="fa-solid fa-circle-exclamation text-danger"></i>
+                        {% endif %}
+                        <span>{{ message }}</span>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
         {% endif %}
     {% endwith %}
 
-    <div class="card shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-uppercase fs-7">
+    <div class="table-responsive shadow-sm">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">ID</th>
+                    <th>Nome / Razão Social</th>
+                    <th>CPF / CNPJ</th>
+                    <th>WhatsApp / Tel</th>
+                    <th>E-mail</th>
+                    <th class="text-end" style="width: 120px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if clientes %}
+                    {% for cliente in clientes %}
                         <tr>
-                            <th class="ps-4">Nome do Cliente</th>
-                            <th>CPF / CNPJ</th>
-                            <th>Contatos</th>
-                            <th>E-mail</th>
-                            <th>Endereço</th>
-                            <th class="text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if clientes %}
-                            {% for c in clientes %}
-                            <tr>
-                                <td class="ps-4">
-                                    <span class="fw-bold text-dark d-block">{{ c.nome }}</span>
-                                    <small class="text-muted">Cadastrado em: {{ c.criado_em.strftime('%d/%m/%Y') }}</small>
-                                </td>
-                                <td>
-                                    {% if c.cpf_cnpj %}
-                                        <span class="font-monospace small">{{ c.cpf_cnpj }}</span>
-                                    {% else %}
-                                        <span class="text-muted mutual">-</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="small">
-                                        {% if c.telefone %}
-                                            <span class="d-block">📞 {{ c.telefone }}</span>
-                                        {% endif %}
-                                        {% if c.whatsapp %}
-                                            <span class="d-block">
-                                                🟢 {{ c.whatsapp }}
-                                                <a href="https://wa.me/55{{ c.whatsapp|replace('(', '')|replace(')', '')|replace(' ', '')|replace('-', '') }}" target="_blank" class="badge bg-success text-decoration-none ms-1">
-                                                    Chamar
-                                                </a>
-                                            </span>
-                                        {% endif %}
-                                        {% if not c.telefone and not c.whatsapp %}
-                                            <span class="text-muted">Sem telefone</span>
-                                        {% endif %}
-                                    </div>
-                                </td>
-                                <td>
-                                    {% if c.email %}
-                                        <span class="small">{{ c.email }}</span>
-                                    {% else %}
-                                        <span class="text-muted small">Não informado</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if c.endereco %}
-                                        <span class="small text-truncate d-inline-block" style="max-width: 200px;" title="{{ c.endereco }}">
-                                            {{ c.endereco }}
-                                        </span>
-                                    {% else %}
-                                        <span class="text-muted small">Não informado</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-center">
-                                    <div class="d-flex justify-content-center gap-2">
-                                        <a href="{{ url_for('cliente.editar_cliente', id=c.id) }}" class="btn btn-sm btn-warning fw-bold py-1 px-2 shadow-sm text-dark">
-                                            Editar
-                                        </a>
-                                        
-                                        <button type="button" 
-                                                class="btn btn-sm btn-danger fw-bold py-1 px-2 shadow-sm" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#confirmDeleteModal" 
-                                                data-nome="{{ c.nome }}"
-                                                data-url="{{ url_for('cliente.deletar_cliente', id=c.id) }}">
-                                            Deletar
+                            <td><span class="id-badge">#{{ cliente.id }}</span></td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ cliente.nome }}</div>
+                                {% if cliente.endereco %}
+                                    <small class="text-muted d-block text-truncate" style="max-width: 250px;">
+                                        <i class="fa-solid fa-location-dot me-1 small"></i>{{ cliente.endereco }}
+                                    </small>
+                                {% endif %}
+                            </td>
+                            <td class="font-monospace text-secondary small">
+                                {{ cliente.cpf_cnpj or '---' }}
+                            </td>
+                            <td>
+                                {% if cliente.whatsapp %}
+                                    <a href="https://wa.me/{{ cliente.whatsapp|replace('(', '')|replace(')', '')|replace(' ', '')|replace('-', '') }}" target="_blank" class="text-decoration-none text-success fw-medium d-block mb-1 small">
+                                        <i class="fa-brands fa-whatsapp me-1"></i>{{ cliente.whatsapp }}
+                                    </a>
+                                {% endif %}
+                                {% if cliente.telefone %}
+                                    <small class="text-muted d-block small"><i class="fa-solid fa-phone me-1 text-secondary"></i>{{ cliente.telefone }}</small>
+                                {% endif %}
+                                {% if not cliente.whatsapp and not cliente.telefone %}
+                                    <span class="text-muted small">---</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-secondary small">
+                                {{ cliente.email or '---' }}
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-2">
+                                    <a href="{{ url_for('cliente.editar_cliente', id=cliente.id) }}" class="btn btn-outline-secondary btn-action" title="Editar dados">
+                                        <i class="fa-solid fa-pen-to-square small"></i>
+                                    </a>
+                                    
+                                    <form action="{{ url_for('cliente.deletar_cliente', id=cliente.id) }}" method="POST" onsubmit="return confirm('Deseja realmente remover o cliente {{ cliente.nome }}? Esta ação não pode ser desfeita.');" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-outline-danger btn-action" title="Excluir cadastro">
+                                            <i class="fa-solid fa-trash-can small"></i>
                                         </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
-                                    Nenhum cliente cadastrado no sistema até o momento.
-                                </td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <div class="mb-2"><i class="fa-solid fa-users-slash fs-3 opacity-50"></i></div>
+                            <p class="mb-0 fw-medium">Nenhum cliente cadastrado no momento.</p>
+                            <small class="text-muted">Clique no botão superior "Novo Cliente" para iniciar os registros.</small>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
     </div>
-</div>
 
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title fw-bold" id="confirmDeleteModalLabel">
-                    ⚠️ Confirmar Remoção de Cliente
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center py-4">
-                <p class="fs-5 mb-2 text-secondary">Deseja mesmo excluir o registro do cliente?</p>
-                <h4 class="fw-bold text-danger mb-3" id="modalClientName">Nome do Cliente</h4>
-                <p class="text-muted small mb-0">Nota: O sistema impedirá a exclusão se este cliente possuir histórico de compras associado.</p>
-            </div>
-            <div class="modal-footer bg-light border-0 justify-content-center gap-2 py-3">
-                <button type="button" class="btn btn-secondary fw-bold px-3 shadow-sm" data-bs-dismiss="modal">Cancelar</button>
-                <form id="deleteForm" action="" method="POST" class="d-inline">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="btn btn-danger fw-bold px-3 shadow-sm">Confirmar Exclusão</button>
-                </form>
-            </div>
-        </div>
-    </div>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const confirmDeleteModal = document.getElementById('confirmDeleteModal');
-        if (confirmDeleteModal) {
-            confirmDeleteModal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                const nomeCliente = button.getAttribute('data-nome');
-                const urlDeletar = button.getAttribute('data-url');
-                
-                const modalClientName = confirmDeleteModal.querySelector('#modalClientName');
-                modalClientName.textContent = nomeCliente;
-                
-                const deleteForm = confirmDeleteModal.querySelector('#deleteForm');
-                deleteForm.setAttribute('action', urlDeletar);
-            });
-        }
-    });
-</script>
 {% endblock %}

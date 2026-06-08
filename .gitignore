@@ -22,3 +22,9 @@ __pycache__/
 
 # Banco de dados local (caso gerasse algum arquivo de log ou sqlite temporário)
 *.sqlite3
+
+venv/
+__pycache__/
+.env
+*.pyc
+migrations/

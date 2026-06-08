@@ -11,6 +11,7 @@ class Usuario(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), default='operador', nullable=False)  # 'administrador' ou 'operador'
     ativo = db.Column(db.Boolean, default=True, nullable=False)
+    precisa_alterar_senha = db.Column(db.Boolean, default=False, nullable=False)
 
     def set_senha(self, senha):
         self.password_hash = generate_password_hash(senha)

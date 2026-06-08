@@ -1,104 +1,265 @@
 {% extends 'base.html' %}
 
-{% block title %}Controle de Caixa - SGC{% endblock %}
+{% block title %}SGC - Fluxo de Caixa Operacional{% endblock %}
+
+{% block styles %}
+<style>
+    .finance-card {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s ease;
+    }
+    .finance-table th {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        font-weight: 600;
+        background-color: #f8fafc;
+    }
+    .value-tag {
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-7">
-            
-            <!-- ALERTA DE MENSAGENS -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm mb-4" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold h3 mb-1 text-dark">Fluxo de Caixa Operacional</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 small text-muted">
+                        <li class="breadcrumb-item"><i class="fa-solid fa-shop me-1"></i>Frente de Loja</li>
+                        <li class="breadcrumb-item active" aria-current="page">Controle de Turnos</li>
+                    </ol>
+                </nav>
+            </div>
+            {% if caixa_aberto %}
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill small fw-semibold d-flex align-items-center gap-1">
+                    <i class="fa-solid fa-circle shadow-sm" style="font-size: 0.5rem;"></i> CAIXA ATIVO
+                </span>
+            {% else %}
+                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill small fw-semibold d-flex align-items-center gap-1">
+                    <i class="fa-solid fa-lock" style="font-size: 0.65rem;"></i> TURNO ENCERRADO
+                </span>
+            {% endif %}
+        </div>
 
-            <!-- CASO 1: CAIXA FECHADO -->
-            {% if not caixa_aberto %}
-            <div class="card shadow border-0">
-                <div class="card-header bg-primary text-white py-3 text-center">
-                    <h4 class="mb-0 fw-bold">🔑 Abertura de Caixa</h4>
-                </div>
-                <div class="card-body p-4">
-                    <p class="text-muted text-center">Informe o fundo de troco em dinheiro para iniciar o turno.</p>
-                    <form action="{{ url_for('caixa.abrir') }}" method="POST">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <div class="mb-4">
-                            <label for="valor_inicial" class="form-label fw-bold text-secondary">Fundo de Troco (R$)</label>
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text bg-light fw-bold">R$</span>
-                                <input type="text" class="form-control form-control-lg font-monospace text-success fw-bold" 
-                                       id="valor_inicial" name="valor_inicial" value="0,00" required autofocus>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-3 shadow-sm">
-                            🟢 Abrir Caixa Operacional
-                        </button>
-                    </form>
+        {% if not caixa_aberto %}
+        <div class="card p-4 text-center finance-card border-0 shadow-sm mb-4">
+            <div class="my-3">
+                <div class="bg-primary bg-opacity-10 text-primary mx-auto d-flex align-items-center justify-content-center rounded-circle shadow-sm" style="width: 56px; height: 56px;">
+                    <i class="fa-solid fa-key fs-4"></i>
                 </div>
             </div>
+            <h4 class="fw-bold text-dark mb-2">Abertura de Turno</h4>
+            <p class="text-muted small px-3 mb-4">
+                Informe o montante inicial disponível em Gaveta (Fundo de Troco) para liberar as operações de venda da aplicação.
+            </p>
 
-            <!-- CASO 2: CAIXA ABERTO -->
-            {% else %}
-            <div class="card shadow border-0">
-                <div class="card-header bg-success text-white py-3 text-center">
-                    <h4 class="mb-0 fw-bold">🟢 Caixa Operacional Ativo</h4>
-                </div>
-                <div class="card-body p-4">
-                    <div class="text-center mb-3">
-                        <h5 class="text-dark fw-bold mb-0">Operador: {{ current_user.nome_completo }}</h5>
-                        <small class="text-muted">Início: {{ caixa_aberto.data_abertura.strftime('%d/%m/%Y às %H:%M') }}</small>
+            <form action="{{ url_for('caixa.abrir') }}" method="POST" class="text-start px-2">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
+                <div class="mb-4">
+                    <label class="form-label small fw-semibold text-secondary">Fundo de Troco Inicial (R$)</label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light fw-bold text-muted border-end-0" style="font-size: 1rem;">R$</span>
+                        <input type="text" name="valor_inicial" id="valor_inicial" class="form-control bg-light fw-bold text-dark border-start-0" placeholder="0,00" required style="letter-spacing: 0.5px;">
                     </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold text-secondary">Usuário Supervisor</label>
+                        <input type="text" name="supervisor_username" class="form-control" placeholder="Login" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold text-secondary">Senha Supervisor</label>
+                        <input type="password" name="supervisor_password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 fw-bold py-2.5 shadow-sm d-flex align-items-center justify-content-center gap-2" style="background-color: #1e3a8a; border: none; border-radius: 8px;">
+                    <i class="fa-solid fa-cash-register"></i> Iniciar Atividades do Caixa
+                </button>
+            </form>
+        </div>
+
+        {% else %}
+        <div class="card p-4 finance-card border-0 shadow-sm mb-4">
+            
+            <div class="d-flex align-items-center gap-3 border-bottom pb-3 mb-4">
+    <div class="bg-light text-secondary d-flex align-items-center justify-content-center rounded-circle border" style="width: 48px; height: 48px;">
+        <i class="fa-solid fa-user fs-5"></i>
+    </div>
+    <div>
+        <h5 class="fw-bold text-dark mb-0 mb-1">
+            {% if caixa_aberto.usuario %}
+                {{ caixa_aberto.usuario.username }}
+            {% else %}
+                {{ current_user.username }}
+            {% endif %}
+        </h5>
+        <span class="text-muted small d-block">
+            <i class="fa-regular fa-clock me-1"></i> Início: {{ caixa_aberto.data_abertura.strftime('%d/%m/%Y às %H:%M') }}
+        </span>
+    </div>
+</div>
+
+            {% if current_user.role in ['admin', 'Administrador'] or current_user.is_admin %}
+                <div class="alert alert-info py-2 px-3 border-0 small mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2" style="border-radius: 8px;">
+                    <div>
+                        <i class="fa-solid fa-eye me-1"></i> <strong>Modo Administrador:</strong> Mostrando saldos calculados pelo sistema.
+                    </div>
+                    <a href="{{ url_for('caixa.auditoria') }}" class="btn btn-primary btn-sm fw-semibold px-3 text-nowrap" style="background-color: #1e3a8a; border: none; border-radius: 6px; font-size: 0.8rem;">
+                        <i class="fa-solid fa-history me-1"></i> Histórico de Turnos
+                    </a>
+                </div>
+
+                <div class="mb-4">
+                    <span class="text-secondary small fw-bold text-uppercase d-block mb-3" style="letter-spacing: 0.5px;"><i class="fa-solid fa-list-check me-1"></i> Resumo do Turno Atual</span>
                     
-                    <!-- Resumo Financeiro Baseado no seu Modelo -->
-                    <h6 class="fw-bold text-secondary border-bottom pb-2 mb-3">Fluxo de Entradas Atual</h6>
-                    <table class="table table-sm align-middle font-monospace mb-4">
+                    <table class="table finance-table align-middle mb-0">
                         <tbody>
                             <tr>
-                                <td>Fundo de Troco Inicial:</td>
-                                <td class="text-end text-dark fw-bold">R$ {{ "%.2f"|format(caixa_aberto.saldo_inicial)|replace('.', ',') }}</td>
-                            </tr>
-                            <tr class="table-success">
-                                <td>💵 Vendas em Dinheiro:</td>
-                                <td class="text-end text-success fw-bold">+ R$ {{ "%.2f"|format(caixa_aberto.total_vendas_dinheiro)|replace('.', ',') }}</td>
+                                <td class="text-muted py-2.5"><i class="fa-solid fa-wallet me-2 text-secondary"></i>Fundo de Troco Inicial</td>
+                                <td class="text-end fw-bold value-tag text-dark py-2.5">R$ {{ "%.2f"|format(caixa_aberto.saldo_inicial)|replace('.', ',') }}</td>
                             </tr>
                             <tr>
-                                <td>📱 Recebimentos via PIX:</td>
-                                <td class="text-end text-primary">R$ {{ "%.2f"|format(caixa_aberto.total_vendas_pix)|replace('.', ',') }}</td>
+                                <td class="text-muted py-2.5"><i class="fa-solid fa-money-bill-wave me-2 text-success"></i>Vendas em Dinheiro (Sistema)</td>
+                                <td class="text-end fw-bold value-tag text-success py-2.5">+ R$ {{ "%.2f"|format(caixa_aberto.total_vendas_dinheiro or 0)|replace('.', ',') }}</td>
                             </tr>
                             <tr>
-                                <td>💳 Cartões (Crédito/Débito):</td>
-                                <td class="text-end text-info">R$ {{ "%.2f"|format(caixa_aberto.total_vendas_cartao)|replace('.', ',') }}</td>
+                                <td class="text-muted py-2.5"><i class="fa-solid fa-qrcode me-2 text-primary"></i>Recebimentos via PIX</td>
+                                <td class="text-end fw-bold value-tag text-primary py-2.5">R$ {{ "%.2f"|format(caixa_aberto.total_vendas_pix or 0)|replace('.', ',') }}</td>
                             </tr>
-                            <tr>
-                                <td>📝 Conta Corrente (Fiado):</td>
-                                <td class="text-end text-warning">R$ {{ "%.2f"|format(caixa_aberto.total_vendas_fiado)|replace('.', ',') }}</td>
+                            <tr class="border-bottom-0">
+                                <td class="text-muted py-2.5"><i class="fa-solid fa-credit-card me-2 text-secondary"></i>Cartões (Crédito/Débito)</td>
+                                <td class="text-end fw-bold value-tag text-muted opacity-75 py-2.5">R$ {{ "%.2f"|format(caixa_aberto.total_vendas_cartao or 0)|replace('.', ',') }}</td>
                             </tr>
                         </tbody>
                     </table>
-
-                    <div class="d-grid gap-2">
-                        <a href="{{ url_for('venda.pdv') }}" class="btn btn-success btn-lg fw-bold py-3 shadow-sm">
-                            🛒 Ir para a Tela do PDV
-                        </a>
-                        <form action="{{ url_for('caixa.fechar') }}" method="POST" class="mt-2" onsubmit="return confirm('Deseja realmente encerrar o caixa e consolidar os saldos?');">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn btn-outline-danger w-100 fw-bold py-2">
-                                🔒 Encerrar Turno e Fechar Caixa
-                            </button>
-                        </form>
-                    </div>
                 </div>
-            </div>
+
+            {% else %}
+                <div class="p-4 text-center bg-light border border-dashed rounded-3 mb-4">
+                    <div class="text-muted opacity-50 mb-2">
+                        <i class="fa-solid fa-calculator fs-1"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">Contagem Cega Ativa</h6>
+                    <p class="text-muted small mb-0 px-2">
+                        Os valores computados pelo sistema estão ocultados para a segurança do fechamento. Ao encerrar, declare o saldo físico em dinheiro contido na gaveta.
+                    </p>
+                </div>
             {% endif %}
 
+            <div class="d-grid gap-2">
+                <a href="{{ url_for('venda.pdv') }}" class="btn btn-emerald w-100 fw-bold py-2.5 d-flex align-items-center justify-content-center text-white" style="background-color: #10b981; border: none; border-radius: 8px;">
+                    <i class="fa-solid fa-cart-shopping me-2"></i> Acessar Frente de Caixa (PDV)
+                </a>
+                
+                <button type="button" onclick="iniciarFechamentoSupervisionado()" class="btn btn-danger w-100 fw-semibold py-2">
+                    <i class="fa-solid fa-lock me-2"></i> Encerrar Turno e Fechar Caixa
+                </button>
+            </div>
+
         </div>
+        {% endif %}
+
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// Lógica de máscara monetária nativa para o Fundo Inicial
+document.addEventListener("DOMContentLoaded", function() {
+    const inputInicial = document.getElementById('valor_inicial');
+    if (inputInicial) {
+        inputInicial.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = (value / 100).toFixed(2) + '';
+            value = value.replace(".", ",");
+            value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+            e.target.value = value;
+        });
+    }
+});
+
+// Arquitetura de Dupla Autenticação por Alçada Supervisionada
+function iniciarFechamentoSupervisionado() {
+    Swal.fire({
+        title: 'Fechamento Supervisionado',
+        html: `
+            <div class="text-start mb-3">
+                <p class="text-muted small border-bottom pb-2">
+                    <i class="fa-solid fa-shield-halved me-1 text-warning"></i> 
+                    <strong>Atenção:</strong> Confirme com o Supervisor antes de encerrar.
+                </p>
+                <div class="mb-2">
+                    <label class="form-label small fw-bold">Usuário Administrador</label>
+                    <input type="text" id="sup-username" class="form-control" placeholder="Ex: admin123">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Senha Administrador</label>
+                    <input type="password" id="sup-password" class="form-control" placeholder="••••••••">
+                </div>
+                <div class="mb-2 bg-light p-3 rounded">
+                    <label class="form-label small fw-bold text-primary">Valor Físico (R$)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">R$</span>
+                        <input type="text" id="sup-valor" class="form-control fw-bold" placeholder="0,00">
+                    </div>
+                </div>
+            </div>`,
+        showCancelButton: true,
+        confirmButtonText: 'Validar e Encerrar',
+        confirmButtonColor: '#1e3a8a',
+        preConfirm: () => {
+            const username = document.getElementById('sup-username').value.trim();
+            const password = document.getElementById('sup-password').value;
+            const dinheiro = document.getElementById('sup-valor').value;
+            if (!username || !password || !dinheiro) {
+                Swal.showValidationMessage('Preencha todos os campos!');
+                return false;
+            }
+            return { username, password, dinheiro_declarado: dinheiro };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({ title: 'Processando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            fetch("{{ url_for('caixa.fechar') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+                body: JSON.stringify(result.value)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sucesso!',
+                        text: data.message || 'Turno encerrado.',
+                        confirmButtonColor: '#1e3a8a'
+                    }).then(() => {
+                        // Força o redirecionamento, priorizando o retorno do servidor ou a página de auditoria
+                        window.location.href = data.redirect || "{{ url_for('caixa.auditoria') }}";
+                    });
+                } else {
+                    Swal.fire('Erro na Autorização', data.message || 'Falha ao encerrar.', 'error');
+                }
+            })
+            .catch(() => {
+                Swal.fire('Erro', 'Falha na comunicação com o servidor.', 'error');
+            });
+        }
+    });
+}
+</script>
 {% endblock %}

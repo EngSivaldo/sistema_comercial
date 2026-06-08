@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
+from app import db # Importamos o db para o commit da senha
 from app.models.usuario import Usuario
 from app.forms.auth import LoginForm
 
@@ -8,28 +9,36 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    # Se o usuário já estiver logado, redireciona direto para o painel
     if current_user.is_authenticated:
-        return redirect(url_for('auth.dashboard'))
+        # Se já estiver logado, redireciona conforme o nível de acesso
+        if current_user.is_admin:
+            return redirect(url_for('auth.dashboard'))
+        return redirect(url_for('venda.pdv')) # Corrigido aqui
         
     form = LoginForm()
     
-    # Executa a validação do Flask-WTF e a proteção CSRF ao submeter o formulário
     if form.validate_on_submit():
-        # Busca o usuário no PostgreSQL usando o username digitado
         usuario = Usuario.query.filter_by(username=form.username.data).first()
         
-        # Valida se o usuário existe, se está ativo e se a senha criptografada confere
         if usuario and usuario.ativo and usuario.verificar_senha(form.password.data):
             login_user(usuario)
-            flash(f'Bem-vindo ao SGC, {usuario.nome_completo}!', 'success')
             
-            # Caso o usuário tenha sido interceptado tentando acessar uma rota protegida,
-            # o Flask-Login lembra a URL original e a guarda no parâmetro 'next'
+            # --- INTERCEPTAÇÃO DE SEGURANÇA (PEDÁGIO) ---
+            if usuario.precisa_alterar_senha:
+                flash('Atenção: Você precisa alterar sua senha para continuar.', 'warning')
+                return redirect(url_for('auth.primeiro_acesso'))
+            
+           
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('auth.dashboard'))
             
-        # Alerta de erro genérico para dificultar engenharia reversa maliciosa
+            if next_page:
+                return redirect(next_page)
+            
+            # Redirecionamento baseado no nível de acesso após o login bem-sucedido
+            if usuario.is_admin:
+                return redirect(url_for('auth.dashboard'))
+            return redirect(url_for('venda.pdv')) # Corrigido aqui
+            
         flash('Usuário ou senha inválidos, ou conta temporariamente inativa.', 'danger')
         
     return render_template('auth/login.html', form=form)
@@ -41,9 +50,54 @@ def logout():
     flash('Sessão encerrada com sucesso. Até logo!', 'info')
     return redirect(url_for('auth.login'))
 
-
-# Rota definitiva do Painel Principal (Apontando para a subpasta)
 @auth_bp.route('/dashboard')
 @login_required
 def dashboard():
+    # Segurança extra: se um operador burlar a URL e cair aqui com senha temporária
+    if current_user.precisa_alterar_senha:
+        return redirect(url_for('auth.primeiro_acesso'))
+    
+    # Bloqueio de perfil: Operador de caixa não acessa o painel operacional
+    if not current_user.is_admin:
+        flash('Acesso restrito para administradores.', 'warning')
+        return redirect(url_for('venda.pdv')) # Corrigido aqui
+        
     return render_template('dashboard/dashboard.html')
+
+@auth_bp.route('/primeiro-acesso', methods=['GET', 'POST'])
+@login_required
+def primeiro_acesso():
+    # Se o usuário já alterou a senha, bloqueia o acesso a esta tela
+    if not current_user.precisa_alterar_senha:
+        if current_user.is_admin:
+            return redirect(url_for('auth.dashboard'))
+        return redirect(url_for('venda.pdv')) # Corrigido aqui
+
+    if request.method == 'POST':
+        nova_senha = request.form.get('nova_senha', '')
+        confirma_senha = request.form.get('confirma_senha', '')
+
+        if len(nova_senha) < 6:
+            flash("A senha deve ter pelo menos 6 caracteres.", "warning")
+            return render_template('auth/primeiro_acesso.html')
+
+        if nova_senha != confirma_senha:
+            flash("As senhas não coincidem.", "danger")
+            return render_template('auth/primeiro_acesso.html')
+
+        try:
+            current_user.set_senha(nova_senha)
+            current_user.precisa_alterar_senha = False
+            db.session.commit()
+            flash("Senha alterada com sucesso!", "success")
+            
+            # Redirecionamento inteligente após a definição da nova senha própria
+            if current_user.is_admin:
+                return redirect(url_for('auth.dashboard'))
+            return redirect(url_for('venda.pdv')) # Corrigido aqui
+            
+        except Exception:
+            db.session.rollback()
+            flash("Erro ao salvar nova senha.", "danger")
+
+    return render_template('auth/primeiro_acesso.html')

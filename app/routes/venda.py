@@ -12,16 +12,26 @@ from datetime import datetime
 
 venda_bp = Blueprint('venda', __name__, url_prefix='/vendas')
 
+from datetime import datetime, date
+
 @venda_bp.route('/pdv', methods=['GET'])
 @login_required
 def pdv():
-    # Verifica se o operador atual tem um caixa aberto
+    # 1. Busca caixa aberto pelo usuário logado
     caixa_aberto = Caixa.query.filter_by(usuario_id=current_user.id, status='Aberto').first()
     
+    # 2. SE NÃO HOUVER CAIXA: Bloqueia e envia para abertura
     if not caixa_aberto:
         flash('Atenção: Você precisa abrir o caixa antes de realizar vendas!', 'warning')
-        return redirect(url_for('auth.dashboard')) # Ou para a rota de caixas se já existir
-        
+        return redirect(url_for('caixa.controle')) 
+
+    # 3. NOVO: BLOQUEIO DE TURNO VENCIDO (Mais de 24h ou data anterior)
+    # Compara a data de abertura do caixa com a data de hoje (UTC)
+    if caixa_aberto.data_abertura.date() < datetime.utcnow().date():
+        flash('Turno vencido! Este caixa foi aberto em um dia anterior. Encerre-o para iniciar um novo turno.', 'danger')
+        return redirect(url_for('caixa.controle'))
+
+    # 4. SE TUDO ESTIVER OK: Segue o fluxo normal
     clientes = Cliente.query.order_by(Cliente.nome).all()
     return render_template('vendas/pdv.html', clientes=clientes, caixa=caixa_aberto)
 

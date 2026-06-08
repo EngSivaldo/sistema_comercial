@@ -37,4 +37,5 @@ def create_admin(username, nome, password):
         click.echo(f"❌ Erro ao salvar no banco de dados: {e}")
 
 if __name__ == "__main__":
+    # REMOVA qualquer parâmetro dentro do .run()
     app.run()

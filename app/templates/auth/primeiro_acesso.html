@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Primeiro Acesso - Alteração de Senha Obrigatória{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 75vh;">
+    <div class="card shadow-lg border-0" style="max-width: 450px; width: 100%;">
+        <div class="card-header bg-dark text-white text-center py-4 rounded-top">
+            <h4 class="fw-bold mb-1">🔒 Primeiro Acesso</h4>
+            <p class="text-light opacity-75 small mb-0">Por motivos de segurança, você deve alterar sua senha inicial.</p>
+        </div>
+        <div class="card-body p-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show border-0 small mb-3" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('auth.primeiro_acesso') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="mb-3">
+                    <label for="nova_senha" class="form-label fw-bold text-secondary small">Nova Senha Secreta</label>
+                    <input type="password" class="form-center form-control form-control-lg border-2" id="nova_senha" name="nova_senha" placeholder="Mínimo 6 caracteres" required autofocus>
+                </div>
+
+                <div class="mb-4">
+                    <label for="confirma_senha" class="form-label fw-bold text-secondary small">Confirme a Nova Senha</label>
+                    <input type="password" class="form-control form-control-lg border-2" id="confirma_senha" name="confirma_senha" placeholder="Digite exatamente igual" required>
+                </div>
+
+                <button type="submit" class="btn btn-dark btn-lg w-100 fw-bold shadow-sm">
+                    Salvar Senha e Entrar 🚀
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -36,7 +36,6 @@ def cadastrar_usuario():
             flash("Todos os campos obrigatórios devem ser preenchidos.", "warning")
             return render_template('usuarios/cadastrar.html')
 
-        # Regra de Produção: Validação de força de senha no Backend
         if len(senha) < 6:
             flash("Segurança enfraquecida: A senha deve conter no mínimo 6 caracteres.", "warning")
             return render_template('usuarios/cadastrar.html')
@@ -47,14 +46,26 @@ def cadastrar_usuario():
             return render_template('usuarios/cadastrar.html')
 
         try:
-            novo_usuario = Usuario(username=username, nome_completo=nome_completo, role=role)
+            # AJUSTE AQUI: Adicionamos 'precisa_alterar_senha=True' 
+            # para que o novo usuário seja forçado a trocar a senha logo no login.
+            novo_usuario = Usuario(
+                username=username, 
+                nome_completo=nome_completo, 
+                role=role,
+                precisa_alterar_senha=True 
+            )
             novo_usuario.set_senha(senha)
             db.session.add(novo_usuario)
             db.session.commit()
+            
             flash(f"Usuário '{nome_completo}' cadastrado com sucesso!", "success")
             return redirect(url_for('usuario.listar_usuarios'))
+            
         except Exception as e:
             db.session.rollback()
+            # Dica: Durante o teste, se o erro persistir, você pode trocar a flash 
+            # pela linha abaixo para ver o erro técnico no navegador:
+            # flash(f"Erro interno: {str(e)}", "danger")
             flash("Erro interno ao salvar o usuário.", "danger")
 
     return render_template('usuarios/cadastrar.html')

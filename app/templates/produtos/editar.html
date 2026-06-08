@@ -1,77 +1,182 @@
 {% extends "base.html" %}
 
+{% block title %}Editar Produto - SGC{% endblock %}
+
+{% block styles %}
+<style>
+    /* Estilização de Cartões de Formulário */
+    .form-card {
+        border-radius: 12px !important;
+        border: 1px solid #e2e8f0 !important;
+        background-color: #ffffff;
+    }
+
+    /* Customização sutil de inputs corporativos */
+    .form-control, .form-select {
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 0.625rem 0.75rem !important;
+        color: #334155 !important;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #1e3a8a !important;
+        box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1) !important;
+        outline: 0;
+    }
+
+    .form-label {
+        font-size: 0.8rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.05em !important;
+        color: #475569 !important;
+        text-uppercase: true;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* Input readonly de SKU */
+    .sku-readonly {
+        background-color: #f8fafc !important;
+        color: #64748b !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.05em;
+        border-style: dashed !important;
+    }
+
+    /* Botões Customizados */
+    .btn-submit {
+        background-color: #1e3a8a !important;
+        border-color: #1e3a8a !important;
+        color: #ffffff !important;
+        border-radius: 8px !important;
+        padding: 0.625rem 1.5rem !important;
+        transition: all 0.2s;
+    }
+
+    .btn-submit:hover {
+        background-color: #1e40af !important;
+        border-color: #1e40af !important;
+    }
+
+    .btn-cancel {
+        border-radius: 8px !important;
+        padding: 0.625rem 1.25rem !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #475569 !important;
+        background-color: #ffffff;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #f1f5f9 !important;
+        color: #1e293b !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center bg-primary text-white p-3 rounded shadow-sm mb-4">
-        <h4 class="mb-0">SGC - Comercial</h4>
-        <a href="{{ url_for('produto.listar_produtos') }}" class="btn btn-outline-light btn-sm">Cancelar</a>
+<div class="container py-2" style="max-width: 850px;">
+
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4 pb-3 border-bottom border-light">
+        <div>
+            <h2 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">Editar Produto</h2>
+            <p class="text-secondary mb-0">Atualize as informações cadastrais, preços ou controle de estoque do item selecionado.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('produto.listar_produtos') }}" class="btn btn-cancel fw-semibold small d-inline-flex align-items-center">
+                <i class="fa-solid fa-arrow-left me-2 small"></i> Cancelar e Voltar
+            </a>
+        </div>
     </div>
 
-    <div class="card shadow border-0 max-width-800 mx-auto">
-        <div class="card-header bg-white border-bottom p-3">
-            <h5 class="mb-0 text-secondary fw-bold">Formulário de Edição de Produto</h5>
-        </div>
-        <div class="card-body p-4">
+    <div class="card form-card shadow-sm mb-5">
+        <div class="card-body p-4 p-sm-5">
             <form method="POST" enctype="multipart/form-data">
                 {{ form.hidden_tag() }}
 
                 <div class="row g-3 mb-3">
                     <div class="col-md-4">
-                        <label class="form-label fw-bold small text-muted">Código Interno / SKU</label>
-                        <input type="text" class="form-control bg-light text-muted fw-bold" value="{{ produto.codigo_interno }}" readonly>
+                        <label class="form-label">Código Interno / SKU</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0" style="border-radius: 8px 0 0 8px;"><i class="fa-solid fa-barcode small"></i></span>
+                            <input type="text" class="form-control border-start-0 sku-readonly" value="{{ produto.codigo_interno }}" readonly>
+                        </div>
                     </div>
-
                     <div class="col-md-8">
-                        <label for="nome" class="form-label fw-bold small text-muted">Nome do Produto</label>
-                        {{ form.nome(class="form-control") }}
+                        <label for="nome" class="form-label">Nome do Produto</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0" style="border-radius: 8px 0 0 8px;"><i class="fa-solid fa-box small"></i></span>
+                            {{ form.nome(class="form-control border-start-0") }}
+                        </div>
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label for="descricao" class="form-label fw-bold small text-muted">Descrição</label>
+                    <label for="descricao" class="form-label">Descrição</label>
                     {{ form.descricao(class="form-control", rows="2") }}
                 </div>
 
                 <div class="row g-3 mb-3">
                     <div class="col-md-5">
-                        <label for="categoria" class="form-label fw-bold small text-muted">Categoria</label>
-                        {{ form.categoria(class="form-select") }}
+                        <label for="categoria" class="form-label">Categoria</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0" style="border-radius: 8px 0 0 8px;"><i class="fa-solid fa-tags small"></i></span>
+                            {{ form.categoria(class="form-select border-start-0") }}
+                        </div>
                     </div>
-
                     <div class="col-md-7">
-                        <label for="imagem" class="form-label fw-bold small text-muted">Substituir Imagem do Produto</label>
-                        {{ form.imagem(class="form-control") }}
+                        <label for="imagem" class="form-label">Substituir Imagem do Produto</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0" style="border-radius: 8px 0 0 8px;"><i class="fa-solid fa-image small"></i></span>
+                            {{ form.imagem(class="form-control border-start-0") }}
+                        </div>
                         {% if produto.imagem_url %}
-                            <small class="text-success d-block mt-1">✓ Já possui uma imagem salva no catálogo.</small>
+                            <div class="d-flex align-items-center text-success small mt-2 fw-semibold">
+                                <i class="fa-solid fa-circle-check me-1"></i> Item possui uma imagem ativa no catálogo.
+                            </div>
                         {% endif %}
                     </div>
                 </div>
 
+                <hr class="my-4 opacity-50" style="border-color: #cbd5e1;">
+
                 <div class="row g-3 mb-4">
                     <div class="col-6 col-md-3">
-                        <label for="preco_custo" class="form-label fw-bold small text-muted">Preço de Custo (R$)</label>
-                        {{ form.preco_custo(class="form-control") }}
+                        <label for="preco_custo" class="form-label">Preço de Custo</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0" style="border-radius: 8px 0 0 8px;">R$</span>
+                            {{ form.preco_custo(class="form-control border-start-0") }}
+                        </div>
                     </div>
-
+                    
                     <div class="col-6 col-md-3">
-                        <label for="preco_venda" class="form-label fw-bold small text-muted">Preço de Venda (R$)</label>
-                        {{ form.preco_venda(class="form-control") }}
+                        <label for="preco_venda" class="form-label">Preço de Venda</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0" style="border-radius: 8px 0 0 8px;">R$</span>
+                            {{ form.preco_venda(class="form-control border-start-0") }}
+                        </div>
                     </div>
-
+                    
                     <div class="col-6 col-md-3">
-                        <label for="quantidade_estoque" class="form-label fw-bold small text-muted">Quantidade em Estoque</label>
-                        {{ form.quantidade_estoque(class="form-control") }}
+                        <label for="quantidade_estoque" class="form-label">Qtd em Estoque</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0" style="border-radius: 8px 0 0 8px;"><i class="fa-solid fa-cubes small"></i></span>
+                            {{ form.quantidade_estoque(class="form-control border-start-0") }}
+                        </div>
                     </div>
-
+                    
                     <div class="col-6 col-md-3">
-                        <label for="estoque_minimo" class="form-label fw-bold small text-muted">Estoque Mínimo</label>
-                        {{ form.estoque_minimo(class="form-control") }}
+                        <label for="estoque_minimo" class="form-label">Estoque Mínimo</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0" style="border-radius: 8px 0 0 8px;"><i class="fa-solid fa-triangle-exclamation small"></i></span>
+                            {{ form.estoque_minimo(class="form-control border-start-0") }}
+                        </div>
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ url_for('produto.listar_produtos') }}" class="btn btn-light fw-bold">Voltar para a Lista</a>
-                    <button type="submit" class="btn btn-success fw-bold px-4 shadow-sm">Salvar Alterações</button>
+                <div class="d-flex justify-content-end gap-2 pt-2 border-top border-light mt-4">
+                    <a href="{{ url_for('produto.listar_produtos') }}" class="btn btn-cancel fw-semibold small">Cancelar</a>
+                    <button type="submit" class="btn btn-submit fw-semibold small shadow-sm">Salvar Alterações</button>
                 </div>
             </form>
         </div>

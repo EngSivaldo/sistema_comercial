@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Auditoria de Turnos - SGC{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom">
+        <div>
+            <h2 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">Auditoria de Caixas e Turnos</h2>
+            <div class="text-secondary small">
+                <span><i class="fa-solid fa-shield-halved me-1"></i> Painel Administrativo</span>
+                <span class="text-muted">/</span>
+                <span class="text-dark fw-medium">Histórico de Fechamentos</span>
+            </div>
+        </div>
+        <div>
+            <a href="{{ url_for('caixa.controle') }}" class="btn btn-outline-secondary fw-semibold btn-sm px-3">
+                <i class="fa-solid fa-arrow-left me-1"></i> Voltar ao Fluxo Ativo
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size: 0.95rem;">
+                    <thead class="table-light text-secondary" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <tr>
+                            <th class="ps-4 py-3">Período / Operador</th>
+                            <th class="py-3">Supervisor</th> 
+                            <th class="py-3">Fundo Inicial</th>
+                            <th class="py-3">Vendas Totais</th>
+                            <th class="py-3">Esperado</th>
+                            <th class="py-3">Declarado</th>
+                            <th class="py-3">Diferença</th>
+                            <th class="pe-4 py-3 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if historico_caixas %}
+                            {% for c in historico_caixas %}
+                            <tr>
+                                <td class="ps-4 py-3">
+                                    <div class="fw-bold text-dark">{{ c.usuario.nome_completo if c.usuario.nome_completo else c.usuario.username }}</div>
+                                    <div class="text-muted small" style="font-size: 0.8rem;">
+                                        Abertura: {{ c.data_abertura.strftime('%d/%m/%Y %H:%M') }}<br>
+                                        Fechamento: {{ c.data_fechamento.strftime('%d/%m/%Y %H:%M') if c.data_fechamento else 'N/A' }}
+                                    </div>
+                                    <!-- Link para Detalhes do Turno -->
+                                    <a href="{{ url_for('caixa.detalhes', caixa_id=c.id) }}" class="btn btn-sm btn-link p-0 text-decoration-none">
+                                        <i class="fa-solid fa-list-ul me-1"></i> Ver Vendas
+                                    </a>
+                                </td>
+                                
+                                <td class="py-3">
+                                    {% if c.supervisor_id %}
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill">
+                                            <i class="fa-solid fa-user-shield me-1"></i> Admin ID: {{ c.supervisor_id }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted small">N/A</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="font-monospace text-secondary">R$ {{ "%.2f"|format(c.saldo_inicial)|replace('.', ',') }}</td>
+                                <td>
+                                    <span class="d-block small text-success"><i class="fa-solid fa-money-bill-wave me-1"></i> Din: R$ {{ "%.2f"|format(c.total_vendas_dinheiro or 0.00)|replace('.', ',') }}</span>
+                                    <span class="d-block small text-primary"><i class="fa-solid fa-pix me-1"></i> Pix: R$ {{ "%.2f"|format(c.total_vendas_pix or 0.00)|replace('.', ',') }}</span>
+                                    <span class="d-block small text-warning"><i class="fa-solid fa-credit-card me-1"></i> Cart: R$ {{ "%.2f"|format(c.total_vendas_cartao or 0.00)|replace('.', ',') }}</span>
+                                    <span class="d-block small text-danger"><i class="fa-solid fa-handshake me-1"></i> Fiado: R$ {{ "%.2f"|format(c.total_vendas_fiado or 0.00)|replace('.', ',') }}</span>
+                                </td>
+                                
+                                <td class="font-monospace fw-semibold text-dark">R$ {{ "%.2f"|format(c.saldo_esperado_dinheiro)|replace('.', ',') }}</td>
+                                <td class="font-monospace fw-bold text-primary">R$ {{ "%.2f"|format(c.valor_declarado_dinheiro or 0.00)|replace('.', ',') }}</td>
+                                
+                                <td class="font-monospace fw-bold">
+                                    {% if c.diferenca_fechamento == 0 %}
+                                        <span class="text-success"><i class="fa-solid fa-circle-check me-1"></i> R$ 0,00</span>
+                                    {% elif (c.diferenca_fechamento or 0) < 0 %}
+                                        <span class="text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> - R$ {{ "%.2f"|format(c.diferenca_fechamento|abs)|replace('.', ',') }}</span>
+                                    {% else %}
+                                        <span class="text-info"><i class="fa-solid fa-circle-plus me-1"></i> + R$ {{ "%.2f"|format(c.diferenca_fechamento)|replace('.', ',') }}</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <td class="pe-4 text-center">
+                                    {% if c.diferenca_fechamento == 0 %}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1">Perfeito</span>
+                                    {% elif (c.diferenca_fechamento or 0) < 0 %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1">Quebra</span>
+                                    {% else %}
+                                        <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-2 py-1">Sobra</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-folder-open fs-2 d-block mb-2 opacity-50"></i>
+                                    Nenhum turno de caixa foi finalizado até o momento.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

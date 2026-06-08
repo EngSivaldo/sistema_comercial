@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Turno #{{ caixa.id }} - SGC{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark">Detalhamento do Turno #{{ caixa.id }}</h3>
+            <p class="text-muted">Operador: {{ caixa.usuario.nome_completo or caixa.usuario.username }} | {{ caixa.data_abertura.strftime('%d/%m/%Y %H:%M') }}</p>
+        </div>
+        <a href="{{ url_for('caixa.auditoria') }}" class="btn btn-outline-secondary">Voltar à Auditoria</a>
+    </div>
+
+    <div class="row mb-4">
+        {% set formas = [
+            {'nome': 'Dinheiro', 'val': caixa.total_vendas_dinheiro, 'cor': 'bg-success', 'param': 'Dinheiro'},
+            {'nome': 'PIX', 'val': caixa.total_vendas_pix, 'cor': 'bg-primary', 'param': 'PIX'},
+            {'nome': 'Cartão', 'val': caixa.total_vendas_cartao, 'cor': 'bg-warning text-dark', 'param': 'Cartão'},
+            {'nome': 'Fiado', 'val': caixa.total_vendas_fiado, 'cor': 'bg-danger', 'param': 'Fiado'}
+        ] %}
+
+        {% for f in formas %}
+        <div class="col-md-3">
+            <a href="{{ url_for('caixa.detalhes', caixa_id=caixa.id, forma=f.param) }}" class="text-decoration-none">
+                <div class="card {{ f.cor }} text-white p-3 shadow-sm border-0 h-100">
+                    <small class="opacity-75">Total {{ f.nome }}</small>
+                    <h5 class="mb-0">R$ {{ "%.2f"|format(f.val or 0.00)|replace('.', ',') }}</h5>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between mb-3">
+                <h5 class="card-title">Lista de Vendas {{ '(' + forma_filtro + ')' if forma_filtro else '' }}</h5>
+                {% if forma_filtro %}
+                    <a href="{{ url_for('caixa.detalhes', caixa_id=caixa.id) }}" class="btn btn-sm btn-outline-danger">Limpar Filtro</a>
+                {% endif %}
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Cliente/Item</th>
+                            <th>Forma Pag.</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in vendas %}
+                        <tr>
+                            <td>{{ v.data_venda.strftime('%H:%M:%S') }}</td>
+                            <td>{{ v.descricao or 'Venda Geral' }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ v.forma_pagamento }}</span>
+                            </td>
+                            <td class="fw-bold">R$ {{ "%.2f"|format(v.total or 0.00)|replace('.', ',') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">Nenhuma venda encontrada para este filtro.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
